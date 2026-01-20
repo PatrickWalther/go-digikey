@@ -1,6 +1,18 @@
 # go-digikey
 
-A Go client library for the Digi-Key API v4.
+[![Go Reference](https://pkg.go.dev/badge/github.com/PatrickWalther/go-digikey.svg)](https://pkg.go.dev/github.com/PatrickWalther/go-digikey)
+[![Go Report Card](https://goreportcard.com/badge/github.com/PatrickWalther/go-digikey)](https://goreportcard.com/report/github.com/PatrickWalther/go-digikey)
+[![Tests](https://github.com/PatrickWalther/go-digikey/actions/workflows/test.yml/badge.svg)](https://github.com/PatrickWalther/go-digikey/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Coverage](https://img.shields.io/badge/coverage-70%25-brightgreen)](https://github.com/PatrickWalther/go-digikey)
+
+A Go client library for the [Digi-Key](https://www.digikey.com) API v4.
+
+## Requirements
+
+- **Go 1.22+** (tested on Go 1.22 and 1.23)
+- **Digi-Key API credentials** (OAuth2 client ID and secret)
+- No external dependencies beyond stdlib
 
 ## Features
 
