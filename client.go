@@ -181,7 +181,7 @@ func (c *Client) doWithRetry(ctx context.Context, method, path string, body inte
 			}
 		}
 
-		err, statusCode, shouldRetryRequest := c.doOnce(ctx, method, path, body, result)
+		statusCode, shouldRetryRequest, err := c.doOnce(ctx, method, path, body, result)
 		if err == nil {
 			return nil
 		}
@@ -210,27 +210,27 @@ func (c *Client) doWithRetry(ctx context.Context, method, path string, body inte
 
 // doOnce performs a single HTTP request attempt.
 // Returns (error, statusCode, shouldRetry).
-func (c *Client) doOnce(ctx context.Context, method, path string, body interface{}, result interface{}) (error, int, bool) {
+func (c *Client) doOnce(ctx context.Context, method, path string, body interface{}, result interface{}) (int, bool, error) {
 	if err := c.rateLimiter.Allow(); err != nil {
-		return err, 0, false
+		return 0, false, err
 	}
 
 	token, err := c.tokenManager.getToken(ctx)
 	if err != nil {
-		return err, 0, shouldRetry(err, 0)
+		return 0, shouldRetry(err, 0), err
 	}
 
 	var bodyBytes []byte
 	if body != nil {
 		bodyBytes, err = json.Marshal(body)
 		if err != nil {
-			return fmt.Errorf("digikey: failed to marshal request body: %w", err), 0, false
+			return 0, false, fmt.Errorf("digikey: failed to marshal request body: %w", err)
 		}
 	}
 
 	req, err := http.NewRequestWithContext(ctx, method, c.baseURL+path, bytes.NewReader(bodyBytes))
 	if err != nil {
-		return fmt.Errorf("digikey: failed to create request: %w", err), 0, false
+		return 0, false, fmt.Errorf("digikey: failed to create request: %w", err)
 	}
 
 	locale := c.getLocale()
@@ -238,13 +238,15 @@ func (c *Client) doOnce(ctx context.Context, method, path string, body interface
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("digikey: request failed: %w", err), 0, shouldRetry(err, 0)
+		return 0, shouldRetry(err, 0), fmt.Errorf("digikey: request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("digikey: failed to read response: %w", err), resp.StatusCode, false
+		return resp.StatusCode, false, fmt.Errorf("digikey: failed to read response: %w", err)
 	}
 
 	// Handle rate limiting (429)
@@ -252,33 +254,33 @@ func (c *Client) doOnce(ctx context.Context, method, path string, body interface
 		retryAfter := parseRetryAfter(resp.Header.Get("Retry-After"))
 		c.rateLimiter.UpdateFromResponse(retryAfter)
 		apiErr := c.handleErrorResponse(resp.StatusCode, respBody, resp.Header)
-		return apiErr, resp.StatusCode, true
+		return resp.StatusCode, true, apiErr
 	}
 
 	// Handle unauthorized (401)
 	if resp.StatusCode == http.StatusUnauthorized {
-		return &APIError{
+		return resp.StatusCode, false, &APIError{ // Don't retry here; handled in doWithRetry
 			StatusCode: resp.StatusCode,
 			Message:    "unauthorized",
 			Details:    string(respBody),
 			RequestID:  resp.Header.Get("X-Request-Id"),
-		}, resp.StatusCode, false // Don't retry here; handled in doWithRetry
+		}
 	}
 
 	// Handle other errors
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		apiErr := c.handleErrorResponse(resp.StatusCode, respBody, resp.Header)
-		return apiErr, resp.StatusCode, shouldRetry(nil, resp.StatusCode)
+		return resp.StatusCode, shouldRetry(nil, resp.StatusCode), apiErr
 	}
 
 	// Parse successful response
 	if result != nil && len(respBody) > 0 {
 		if err := json.Unmarshal(respBody, result); err != nil {
-			return fmt.Errorf("digikey: failed to parse response: %w", err), resp.StatusCode, false
+			return resp.StatusCode, false, fmt.Errorf("digikey: failed to parse response: %w", err)
 		}
 	}
 
-	return nil, resp.StatusCode, false
+	return resp.StatusCode, false, nil
 }
 
 // setHeaders sets the required headers for Digi-Key API requests.
