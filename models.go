@@ -59,15 +59,15 @@ type ProductStatus struct {
 
 // ProductVariation represents a product packaging variation.
 type ProductVariation struct {
-	DigiKeyProductNumber  string      `json:"DigiKeyProductNumber"`
-	PackageType           PackageType `json:"PackageType"`
-	StandardPricing       []PriceBreak `json:"StandardPricing"`
-	QuantityAvailable     int         `json:"QuantityAvailableforPackageType"`
-	MinimumOrderQuantity  int         `json:"MinimumOrderQuantity"`
-	StandardPackage       int         `json:"StandardPackage"`
-	DigiReelFee           float64     `json:"DigiReelFee"`
-	MyPricing             []PriceBreak `json:"MyPricing"`
-	MarketplaceRestriction bool       `json:"MarketplaceRestriction"`
+	DigiKeyProductNumber   string       `json:"DigiKeyProductNumber"`
+	PackageType            PackageType  `json:"PackageType"`
+	StandardPricing        []PriceBreak `json:"StandardPricing"`
+	QuantityAvailable      int          `json:"QuantityAvailableforPackageType"`
+	MinimumOrderQuantity   int          `json:"MinimumOrderQuantity"`
+	StandardPackage        int          `json:"StandardPackage"`
+	DigiReelFee            float64      `json:"DigiReelFee"`
+	MyPricing              []PriceBreak `json:"MyPricing"`
+	MarketplaceRestriction bool         `json:"MarketplaceRestriction"`
 }
 
 // PriceBreak represents a quantity-based pricing tier.
@@ -87,13 +87,13 @@ type Parameter struct {
 
 // Category represents a product category.
 type Category struct {
-	CategoryID   int    `json:"CategoryId"`
-	ParentID     int    `json:"ParentId"`
-	Name         string `json:"Name"`
-	ProductCount int    `json:"ProductCount"`
-	NewProductCount int `json:"NewProductCount"`
-	ImageURL     string `json:"ImageUrl"`
-	SeoDescription string `json:"SeoDescription"`
+	CategoryID      int        `json:"CategoryId"`
+	ParentID        int        `json:"ParentId"`
+	Name            string     `json:"Name"`
+	ProductCount    int        `json:"ProductCount"`
+	NewProductCount int        `json:"NewProductCount"`
+	ImageURL        string     `json:"ImageUrl"`
+	SeoDescription  string     `json:"SeoDescription"`
 	ChildCategories []Category `json:"ChildCategories"`
 }
 
@@ -105,7 +105,7 @@ type Manufacturer struct {
 
 // Description represents a product description.
 type Description struct {
-	ProductDescription string `json:"ProductDescription"`
+	ProductDescription  string `json:"ProductDescription"`
 	DetailedDescription string `json:"DetailedDescription"`
 }
 
@@ -117,9 +117,9 @@ type PackageType struct {
 
 // AlternatePackage represents an alternate packaging option.
 type AlternatePackage struct {
-	DigiKeyProductNumber string  `json:"DigiKeyProductNumber"`
-	QuantityAvailable    int     `json:"QuantityAvailable"`
-	UnitPrice            float64 `json:"UnitPrice"`
+	DigiKeyProductNumber string      `json:"DigiKeyProductNumber"`
+	QuantityAvailable    int         `json:"QuantityAvailable"`
+	UnitPrice            float64     `json:"UnitPrice"`
 	PackageType          PackageType `json:"PackageType"`
 }
 
@@ -132,9 +132,9 @@ type LimitedTaxonomy struct {
 
 // Kit represents a kit product.
 type Kit struct {
-	DigiKeyProductNumber string `json:"DigiKeyProductNumber"`
+	DigiKeyProductNumber   string `json:"DigiKeyProductNumber"`
 	ManufacturerPartNumber string `json:"ManufacturerPartNumber"`
-	QuantityInKit        int    `json:"QuantityInKit"`
+	QuantityInKit          int    `json:"QuantityInKit"`
 }
 
 // KitContent represents content of a kit.
@@ -159,8 +159,8 @@ type SearchLocale struct {
 
 // MediaLink represents a media resource.
 type MediaLink struct {
-	MediaType string `json:"MediaType"`
-	Title     string `json:"Title"`
+	MediaType  string `json:"MediaType"`
+	Title      string `json:"Title"`
 	SmallPhoto string `json:"SmallPhoto"`
 	Thumbnail  string `json:"Thumbnail"`
 	URL        string `json:"Url"`
@@ -174,11 +174,11 @@ type Series struct {
 
 // Classifications represents product classifications.
 type Classifications struct {
-	ReachStatus            string `json:"ReachStatus"`
-	RohsStatus             string `json:"RohsStatus"`
+	ReachStatus              string `json:"ReachStatus"`
+	RohsStatus               string `json:"RohsStatus"`
 	MoistureSensitivityLevel string `json:"MoistureSensitivityLevel"`
 	ExportControlClassNumber string `json:"ExportControlClassNumber"`
-	HTSUSCode              string `json:"HtsusCode"`
+	HTSUSCode                string `json:"HtsusCode"`
 }
 
 // SearchRequest represents a keyword search request.
@@ -191,11 +191,11 @@ type SearchRequest struct {
 
 // Filters represents search filters.
 type Filters struct {
-	CategoryIDs        []int             `json:"CategoryIds,omitempty"`
-	ManufacturerIDs    []int             `json:"ManufacturerIds,omitempty"`
-	StatusIDs          []int             `json:"StatusIds,omitempty"`
-	PackageTypeIDs     []int             `json:"PackageTypeIds,omitempty"`
-	ParametricFilters  []ParametricFilter `json:"ParametricFilters,omitempty"`
+	CategoryIDs       []int              `json:"CategoryIds,omitempty"`
+	ManufacturerIDs   []int              `json:"ManufacturerIds,omitempty"`
+	StatusIDs         []int              `json:"StatusIds,omitempty"`
+	PackageTypeIDs    []int              `json:"PackageTypeIds,omitempty"`
+	ParametricFilters []ParametricFilter `json:"ParametricFilters,omitempty"`
 }
 
 // ParametricFilter represents a parametric filter.
@@ -213,10 +213,10 @@ type SortOptions struct {
 
 // FilterRequest represents a filter options request.
 type FilterRequest struct {
-	CategoryFilter      []int `json:"CategoryFilter,omitempty"`
-	ManufacturerFilter  []int `json:"ManufacturerFilter,omitempty"`
-	StatusFilter        []int `json:"StatusFilter,omitempty"`
-	PackageTypeFilter   []int `json:"PackageTypeFilter,omitempty"`
+	CategoryFilter         []int                    `json:"CategoryFilter,omitempty"`
+	ManufacturerFilter     []int                    `json:"ManufacturerFilter,omitempty"`
+	StatusFilter           []int                    `json:"StatusFilter,omitempty"`
+	PackageTypeFilter      []int                    `json:"PackageTypeFilter,omitempty"`
 	ParameterFilterRequest []ParameterFilterRequest `json:"ParameterFilterRequest,omitempty"`
 }
 
@@ -228,22 +228,22 @@ type ParameterFilterRequest struct {
 
 // SearchResponse represents a keyword search response.
 type SearchResponse struct {
-	Products              []Product      `json:"Products"`
-	ProductsCount         int            `json:"ProductsCount"`
-	ExactMatches          []Product      `json:"ExactMatches"`
-	ExactMatchesCount     int            `json:"ExactMatchCount"`
-	FilterOptions         FilterOptions  `json:"FilterOptions"`
-	SearchLocaleUsed      SearchLocale   `json:"SearchLocaleUsed"`
+	Products                 []Product       `json:"Products"`
+	ProductsCount            int             `json:"ProductsCount"`
+	ExactMatches             []Product       `json:"ExactMatches"`
+	ExactMatchesCount        int             `json:"ExactMatchCount"`
+	FilterOptions            FilterOptions   `json:"FilterOptions"`
+	SearchLocaleUsed         SearchLocale    `json:"SearchLocaleUsed"`
 	AppliedParametricFilters []AppliedFilter `json:"AppliedParametricFilters"`
 }
 
 // FilterOptions represents available filter options.
 type FilterOptions struct {
-	Categories           []CategoryFilter    `json:"Categories"`
-	Manufacturers        []ManufacturerFilter `json:"Manufacturers"`
-	Status               []StatusFilter      `json:"Status"`
-	PackageTypes         []PackageTypeFilter `json:"PackageTypes"`
-	ParametricFilters    []ParametricFilterOption `json:"ParametricFilters"`
+	Categories        []CategoryFilter         `json:"Categories"`
+	Manufacturers     []ManufacturerFilter     `json:"Manufacturers"`
+	Status            []StatusFilter           `json:"Status"`
+	PackageTypes      []PackageTypeFilter      `json:"PackageTypes"`
+	ParametricFilters []ParametricFilterOption `json:"ParametricFilters"`
 }
 
 // CategoryFilter represents a category filter option.

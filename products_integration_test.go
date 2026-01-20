@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package digikey
@@ -62,7 +63,7 @@ func TestIntegrationProductDetails(t *testing.T) {
 	if len(product.ProductVariations) == 0 {
 		t.Skip("product has no variations")
 	}
-	
+
 	productNumber := product.ProductVariations[0].DigiKeyProductNumber
 
 	// Now get details for that product
@@ -230,7 +231,7 @@ func TestIntegrationProductDetailsNoCache(t *testing.T) {
 	if len(product.ProductVariations) == 0 {
 		t.Skip("product has no variations")
 	}
-	
+
 	productNumber := product.ProductVariations[0].DigiKeyProductNumber
 
 	// Get details (cached)

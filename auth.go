@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	defaultTokenURL = "https://api.digikey.com/v1/oauth2/token"
+	defaultTokenURL   = "https://api.digikey.com/v1/oauth2/token"
 	tokenExpiryBuffer = 60 * time.Second
 )
 
@@ -78,7 +78,7 @@ func (tm *tokenManager) refreshToken(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("digikey: failed to create token request: %w", err)
 	}
-	
+
 	// Use HTTP Basic Auth for client credentials (not form data)
 	req.SetBasicAuth(tm.clientID, tm.clientSecret)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")

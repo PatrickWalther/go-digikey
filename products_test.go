@@ -218,7 +218,7 @@ func TestKeywordSearchWithCache(t *testing.T) {
 
 	// Create fake response and cache it
 	resp := &SearchResponse{
-		ProductsCount: 1,
+		ProductsCount:    1,
 		SearchLocaleUsed: SearchLocale{Site: "US", Language: "en"},
 	}
 	if data, err := json.Marshal(resp); err == nil {

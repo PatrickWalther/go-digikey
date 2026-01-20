@@ -39,9 +39,9 @@ func TestProductStructure(t *testing.T) {
 // TestProductVariationStructure tests ProductVariation structure.
 func TestProductVariationStructure(t *testing.T) {
 	pv := ProductVariation{
-		DigiKeyProductNumber:  "TL072CP-ND",
-		MinimumOrderQuantity:  1,
-		QuantityAvailable:     5000,
+		DigiKeyProductNumber: "TL072CP-ND",
+		MinimumOrderQuantity: 1,
+		QuantityAvailable:    5000,
 		StandardPricing: []PriceBreak{
 			{BreakQuantity: 1, UnitPrice: 0.55, TotalPrice: 0.55},
 			{BreakQuantity: 10, UnitPrice: 0.50, TotalPrice: 5.00},
@@ -232,10 +232,10 @@ func TestProductDetailsResponse(t *testing.T) {
 // TestFilters tests Filters structure.
 func TestFilters(t *testing.T) {
 	filters := Filters{
-		CategoryIDs:      []int{1, 2, 3},
-		ManufacturerIDs:  []int{10, 20},
-		StatusIDs:        []int{1},
-		PackageTypeIDs:   []int{5, 6},
+		CategoryIDs:     []int{1, 2, 3},
+		ManufacturerIDs: []int{10, 20},
+		StatusIDs:       []int{1},
+		PackageTypeIDs:  []int{5, 6},
 	}
 
 	if len(filters.CategoryIDs) != 3 {

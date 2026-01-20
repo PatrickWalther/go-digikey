@@ -177,7 +177,7 @@ func TestTokenManagerCaching(t *testing.T) {
 	if token1 != "token" {
 		t.Errorf("expected token, got %s", token1)
 	}
-	
+
 	// Should have made exactly 1 call
 	if calls != 1 {
 		t.Errorf("expected 1 call, got %d", calls)
