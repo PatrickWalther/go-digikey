@@ -12,6 +12,7 @@ func TestNewSearch(t *testing.T) {
 	search := NewSearch("resistor")
 	if search == nil {
 		t.Error("expected non-nil SearchOptions")
+		return
 	}
 	if search.request.Keywords != "resistor" {
 		t.Errorf("expected keywords 'resistor', got '%s'", search.request.Keywords)
@@ -82,6 +83,7 @@ func TestSearchOptionsBuild(t *testing.T) {
 	built := NewSearch("diode").Limit(15).Offset(3).Build()
 	if built == nil {
 		t.Error("Build() returned nil")
+		return
 	}
 	if built.Keywords != "diode" {
 		t.Errorf("expected keywords 'diode', got '%s'", built.Keywords)
