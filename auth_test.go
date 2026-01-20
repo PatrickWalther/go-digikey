@@ -13,7 +13,7 @@ func TestTokenManagerGetToken(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"access_token":"test-token","token_type":"Bearer","expires_in":3600}`))
+		_, _ = w.Write([]byte(`{"access_token":"test-token","token_type":"Bearer","expires_in":3600}`))
 	}))
 	defer server.Close()
 
@@ -38,7 +38,7 @@ func TestTokenManagerRefresh(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"access_token":"refresh-token","token_type":"Bearer","expires_in":7200}`))
+		_, _ = w.Write([]byte(`{"access_token":"refresh-token","token_type":"Bearer","expires_in":7200}`))
 	}))
 	defer server.Close()
 
@@ -69,7 +69,7 @@ func TestTokenManagerInvalidate(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"access_token":"test-token","token_type":"Bearer","expires_in":3600}`))
+		_, _ = w.Write([]byte(`{"access_token":"test-token","token_type":"Bearer","expires_in":3600}`))
 	}))
 	defer server.Close()
 
@@ -97,7 +97,7 @@ func TestTokenManagerAuthError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(`{"error":"invalid_client","error_description":"Invalid credentials"}`))
+		_, _ = w.Write([]byte(`{"error":"invalid_client","error_description":"Invalid credentials"}`))
 	}))
 	defer server.Close()
 
@@ -125,7 +125,7 @@ func TestTokenManagerBasicAuth(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"access_token":"test-token","token_type":"Bearer","expires_in":3600}`))
+		_, _ = w.Write([]byte(`{"access_token":"test-token","token_type":"Bearer","expires_in":3600}`))
 	}))
 	defer server.Close()
 
@@ -164,7 +164,7 @@ func TestTokenManagerCaching(t *testing.T) {
 		calls++
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"access_token":"token","token_type":"Bearer","expires_in":3600}`))
+		_, _ = w.Write([]byte(`{"access_token":"token","token_type":"Bearer","expires_in":3600}`))
 	}))
 	defer server.Close()
 

@@ -20,7 +20,7 @@ func TestClientSetHeaders(t *testing.T) {
 			t.Error("Content-Type header missing")
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"recordCount":0,"products":[]}`))
+		_, _ = w.Write([]byte(`{"recordCount":0,"products":[]}`))
 	}))
 	defer server.Close()
 
@@ -37,7 +37,7 @@ func TestClientHandleErrorResponse(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`{"statusCode":400,"message":"Bad Request","details":"Invalid parameters"}`))
+		_, _ = w.Write([]byte(`{"statusCode":400,"message":"Bad Request","details":"Invalid parameters"}`))
 	}))
 	defer server.Close()
 
@@ -56,7 +56,7 @@ func TestClientHandleRateLimitError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusTooManyRequests)
-		w.Write([]byte(`{"statusCode":429,"message":"Rate Limited"}`))
+		_, _ = w.Write([]byte(`{"statusCode":429,"message":"Rate Limited"}`))
 	}))
 	defer server.Close()
 
@@ -75,7 +75,7 @@ func TestClientRetryLogic(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"products":[]}`))
+		_, _ = w.Write([]byte(`{"products":[]}`))
 	}))
 	defer server.Close()
 
@@ -112,7 +112,7 @@ func TestClientCacheBypass(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"recordCount":0,"products":[]}`))
+		_, _ = w.Write([]byte(`{"recordCount":0,"products":[]}`))
 	}))
 	defer server.Close()
 
@@ -130,7 +130,7 @@ func TestClientResponseMalformed(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{invalid json}`))
+		_, _ = w.Write([]byte(`{invalid json}`))
 	}))
 	defer server.Close()
 
@@ -209,7 +209,7 @@ func TestClientHeadersNotModified(t *testing.T) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"recordCount":0,"products":[]}`))
+		_, _ = w.Write([]byte(`{"recordCount":0,"products":[]}`))
 	}))
 	defer server.Close()
 
@@ -239,9 +239,9 @@ func TestClientDo(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 
 			if test.method == http.MethodPost {
-				w.Write([]byte(`{"recordCount":0,"products":[]}`))
+				_, _ = w.Write([]byte(`{"recordCount":0,"products":[]}`))
 			} else {
-				w.Write([]byte(`{"product":{"digiKeyProductNumber":"123"}}`))
+				_, _ = w.Write([]byte(`{"product":{"digiKeyProductNumber":"123"}}`))
 			}
 		}))
 
@@ -265,7 +265,7 @@ func TestClientStatusCodeHandling(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"products":[]}`))
+		_, _ = w.Write([]byte(`{"products":[]}`))
 	}))
 
 	client := NewClient("test-id", "test-secret", WithBaseURL(server.URL), WithoutRetry())
@@ -279,7 +279,7 @@ func TestClientStatusCodeHandling(t *testing.T) {
 	server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`{"message":"error"}`))
+		_, _ = w.Write([]byte(`{"message":"error"}`))
 	}))
 
 	client = NewClient("test-id", "test-secret", WithBaseURL(server.URL), WithoutRetry())
@@ -301,7 +301,7 @@ func TestClientResponseBodyClosing(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 
 		// Return a response that tracks if it's closed
-		w.Write([]byte(`{"recordCount":0,"products":[]}`))
+		_, _ = w.Write([]byte(`{"recordCount":0,"products":[]}`))
 	}))
 	defer server.Close()
 
