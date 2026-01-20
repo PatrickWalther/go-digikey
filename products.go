@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	productsBasePath = "/products/v4/search"
+	searchBasePath = "/products/v4/search"
 )
 
 // KeywordSearch searches for products using keywords.
@@ -24,11 +24,11 @@ func (c *Client) KeywordSearch(ctx context.Context, req *SearchRequest) (*Search
 
 	// Create a copy to avoid mutating the caller's request
 	searchReq := *req
-	if searchReq.RecordCount <= 0 {
-		searchReq.RecordCount = 10
+	if searchReq.Limit <= 0 {
+		searchReq.Limit = 10
 	}
-	if searchReq.RecordCount > 50 {
-		searchReq.RecordCount = 50
+	if searchReq.Limit > 50 {
+		searchReq.Limit = 50
 	}
 
 	// Check cache
@@ -43,7 +43,7 @@ func (c *Client) KeywordSearch(ctx context.Context, req *SearchRequest) (*Search
 	}
 
 	var resp SearchResponse
-	err := c.do(ctx, http.MethodPost, productsBasePath+"/keyword", &searchReq, &resp)
+	err := c.do(ctx, http.MethodPost, searchBasePath+"/keyword", &searchReq, &resp)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (c *Client) ProductDetails(ctx context.Context, productNumber string) (*Pro
 		}
 	}
 
-	path := fmt.Sprintf("%s/%s/productdetails", productsBasePath, url.PathEscape(productNumber))
+	path := fmt.Sprintf("%s/%s/productdetails", searchBasePath, url.PathEscape(productNumber))
 
 	var resp ProductDetailsResponse
 	err := c.do(ctx, http.MethodGet, path, nil, &resp)
@@ -102,7 +102,7 @@ func (c *Client) ProductDetailsNoCache(ctx context.Context, productNumber string
 		return nil, fmt.Errorf("%w: product number is required", ErrInvalidRequest)
 	}
 
-	path := fmt.Sprintf("%s/%s/productdetails", productsBasePath, url.PathEscape(productNumber))
+	path := fmt.Sprintf("%s/%s/productdetails", searchBasePath, url.PathEscape(productNumber))
 
 	var resp ProductDetailsResponse
 	err := c.do(ctx, http.MethodGet, path, nil, &resp)
@@ -130,8 +130,8 @@ type SearchOptions struct {
 func NewSearch(keywords string) *SearchOptions {
 	return &SearchOptions{
 		request: SearchRequest{
-			Keywords:    keywords,
-			RecordCount: 10,
+			Keywords: keywords,
+			Limit:    10,
 		},
 	}
 }
@@ -144,7 +144,7 @@ func (s *SearchOptions) Limit(count int) *SearchOptions {
 	if count > 50 {
 		count = 50
 	}
-	s.request.RecordCount = count
+	s.request.Limit = count
 	return s
 }
 
@@ -153,76 +153,13 @@ func (s *SearchOptions) Offset(position int) *SearchOptions {
 	if position < 0 {
 		position = 0
 	}
-	s.request.RecordStartPosition = position
+	s.request.Offset = position
 	return s
 }
 
-// WithQuantity sets the requested quantity for pricing calculations.
-func (s *SearchOptions) WithQuantity(qty int) *SearchOptions {
-	s.request.RequestedQuantity = qty
-	return s
-}
-
-// FilterByCategory adds category filters.
-func (s *SearchOptions) FilterByCategory(categoryIDs ...int) *SearchOptions {
-	if s.request.Filters == nil {
-		s.request.Filters = &Filters{}
-	}
-	s.request.Filters.CategoryIDs = append(s.request.Filters.CategoryIDs, categoryIDs...)
-	return s
-}
-
-// FilterByManufacturer adds manufacturer filters.
-func (s *SearchOptions) FilterByManufacturer(manufacturerIDs ...int) *SearchOptions {
-	if s.request.Filters == nil {
-		s.request.Filters = &Filters{}
-	}
-	s.request.Filters.ManufacturerIDs = append(s.request.Filters.ManufacturerIDs, manufacturerIDs...)
-	return s
-}
-
-// FilterByStatus adds status filters.
-func (s *SearchOptions) FilterByStatus(statusIDs ...int) *SearchOptions {
-	if s.request.Filters == nil {
-		s.request.Filters = &Filters{}
-	}
-	s.request.Filters.StatusIDs = append(s.request.Filters.StatusIDs, statusIDs...)
-	return s
-}
-
-// FilterByPackageType adds package type filters.
-func (s *SearchOptions) FilterByPackageType(packageTypeIDs ...int) *SearchOptions {
-	if s.request.Filters == nil {
-		s.request.Filters = &Filters{}
-	}
-	s.request.Filters.PackageTypeIDs = append(s.request.Filters.PackageTypeIDs, packageTypeIDs...)
-	return s
-}
-
-// AddParametricFilter adds a parametric filter.
-func (s *SearchOptions) AddParametricFilter(parameterID int, valueIDs ...string) *SearchOptions {
-	if s.request.Filters == nil {
-		s.request.Filters = &Filters{}
-	}
-	s.request.Filters.ParametricFilters = append(s.request.Filters.ParametricFilters, ParametricFilter{
-		ParameterID: parameterID,
-		ValueIDs:    valueIDs,
-	})
-	return s
-}
-
-// SortBy sets the sort field and direction.
-func (s *SearchOptions) SortBy(field, direction string) *SearchOptions {
-	s.request.Sort = &SortOptions{
-		Field:     field,
-		Direction: direction,
-	}
-	return s
-}
-
-// WithSearchOptions adds search options (e.g., "InStock").
-func (s *SearchOptions) WithSearchOptions(options ...string) *SearchOptions {
-	s.request.SearchOptions = append(s.request.SearchOptions, options...)
+// WithFilterOptions sets filter options.
+func (s *SearchOptions) WithFilterOptions(filterRequest *FilterRequest) *SearchOptions {
+	s.request.FilterOptionsRequest = filterRequest
 	return s
 }
 

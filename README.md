@@ -252,6 +252,91 @@ Digi-Key API enforces the following rate limits:
 
 The client tracks these limits locally and returns `ErrRateLimitExceeded` before making requests that would exceed them.
 
+## Testing
+
+### Unit Tests (Fast, No API Calls)
+
+Run fast unit tests that don't require API credentials:
+
+```bash
+# Run all unit tests
+go test -v -short ./...
+
+# Run only short tests (excludes integration tests)
+go test -v -short -run TestMemoryCache ./...
+```
+
+**Coverage**: 121 unit tests covering cache, errors, models, rate limiting, and retry logic. Runtime: ~0.7s.
+
+### Integration Tests (Real API Calls)
+
+Run against real Digi-Key API with actual credentials:
+
+#### 1. Setup Credentials
+
+Create a `.env` file (copy from `.env.example`):
+
+```bash
+cp .env.example .env
+# Edit .env and add your credentials from https://developer.digikey.com/
+```
+
+#### 2. Run Integration Tests Locally
+
+```bash
+# Load credentials from .env and run integration tests
+source .env  # On Windows: set -a; source .env; set +a
+go test -v -tags=integration -run Integration ./...
+
+# Or pass credentials directly
+DIGIKEY_CLIENT_ID=your-id DIGIKEY_CLIENT_SECRET=your-secret \
+  go test -v -tags=integration ./...
+```
+
+#### 3. GitHub Actions Integration Tests
+
+Set up GitHub repository secrets:
+
+1. Go to: **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
+2. Add two secrets:
+   - `DIGIKEY_CLIENT_ID`: Your OAuth client ID
+   - `DIGIKEY_CLIENT_SECRET`: Your OAuth client secret
+
+Integration tests run automatically on push to main/develop branches.
+
+### Test Coverage
+
+- **Unit Tests**: All code paths except integration with real API
+- **Integration Tests**: 
+  - Keyword search with real data
+  - Product details retrieval
+  - Rate limiter tracking with API
+  - Caching behavior
+  - Locale support
+  - OAuth2 token refresh
+  - Bypassing cache
+
+### Test Patterns
+
+**Unit tests** are marked with `-short` flag and run under 1 second:
+
+```go
+// Unit tests (always run)
+func TestNewClient(t *testing.T) { ... }
+func TestCacheGet(t *testing.T) { ... }
+func TestRateLimiter(t *testing.T) { ... }
+```
+
+**Integration tests** use the `+build integration` tag and are skipped by default:
+
+```go
+// +build integration
+func TestIntegrationKeywordSearch(t *testing.T) {
+    skipIfNoCredentials(t)  // Skips if env vars not set
+    // Makes real API calls
+}
+```
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.

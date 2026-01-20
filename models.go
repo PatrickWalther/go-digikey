@@ -30,7 +30,7 @@ type Product struct {
 	Parameters                []Parameter        `json:"Parameters"`
 	Category                  Category           `json:"Category"`
 	DigiKeyProductNumber      string             `json:"DigiKeyProductNumber"`
-	ProductStatus             string             `json:"ProductStatus"`
+	ProductStatus             ProductStatus      `json:"ProductStatus"`
 	DateLastBuyChance         string             `json:"DateLastBuyChance"`
 	AlternatePackaging        []AlternatePackage `json:"AlternatePackaging"`
 	DetailedDescription       string             `json:"DetailedDescription"`
@@ -49,6 +49,12 @@ type Product struct {
 	MediaLinks                []MediaLink        `json:"MediaLinks"`
 	Series                    Series             `json:"Series"`
 	Classifications           Classifications    `json:"Classifications"`
+}
+
+// ProductStatus represents product status information.
+type ProductStatus struct {
+	Id   int    `json:"Id"`
+	Text string `json:"Text"`
 }
 
 // ProductVariation represents a product packaging variation.
@@ -177,14 +183,10 @@ type Classifications struct {
 
 // SearchRequest represents a keyword search request.
 type SearchRequest struct {
-	Keywords              string         `json:"Keywords"`
-	RecordCount           int            `json:"RecordCount,omitempty"`
-	RecordStartPosition   int            `json:"RecordStartPosition,omitempty"`
-	Filters               *Filters       `json:"Filters,omitempty"`
-	Sort                  *SortOptions   `json:"Sort,omitempty"`
-	RequestedQuantity     int            `json:"RequestedQuantity,omitempty"`
-	SearchOptions         []string       `json:"SearchOptions,omitempty"`
-	FilterOptionsRequest  *FilterRequest `json:"FilterOptionsRequest,omitempty"`
+	Keywords             string         `json:"Keywords"`
+	Limit                int            `json:"Limit,omitempty"`
+	Offset               int            `json:"Offset,omitempty"`
+	FilterOptionsRequest *FilterRequest `json:"FilterOptionsRequest,omitempty"`
 }
 
 // Filters represents search filters.

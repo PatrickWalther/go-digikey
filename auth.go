@@ -71,15 +71,16 @@ func (tm *tokenManager) refreshToken(ctx context.Context) (string, error) {
 	}
 
 	data := url.Values{
-		"client_id":     {tm.clientID},
-		"client_secret": {tm.clientSecret},
-		"grant_type":    {"client_credentials"},
+		"grant_type": {"client_credentials"},
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, tm.tokenURL, strings.NewReader(data.Encode()))
 	if err != nil {
 		return "", fmt.Errorf("digikey: failed to create token request: %w", err)
 	}
+	
+	// Use HTTP Basic Auth for client credentials (not form data)
+	req.SetBasicAuth(tm.clientID, tm.clientSecret)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := tm.httpClient.Do(req)
