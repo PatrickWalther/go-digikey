@@ -167,4 +167,3 @@ func (c *Client) ClearCache() {
 		mc.Clear()
 	}
 }
-

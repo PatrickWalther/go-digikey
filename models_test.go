@@ -258,7 +258,7 @@ func TestFilterRequestJSON(t *testing.T) {
 		MinimumQuantityAvailable: 100,
 		SearchOptions:            []string{"InStock"},
 		ParameterFilterRequest: &ParameterFilterRequest{
-			CategoryFilter:   &FilterId{Id: "1"},
+			CategoryFilter: &FilterId{Id: "1"},
 			ParameterFilters: []ParametricFilter{
 				{ParameterID: 100, FilterValues: NewFilterIds(200, 201)},
 			},

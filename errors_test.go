@@ -174,4 +174,3 @@ func TestErrorVariables(t *testing.T) {
 		}
 	}
 }
-

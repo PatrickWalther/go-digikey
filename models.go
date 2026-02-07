@@ -198,15 +198,15 @@ func NewFilterIds(ids ...int) []FilterId {
 
 // FilterRequest represents a filter options request.
 type FilterRequest struct {
-	CategoryFilter         []FilterId               `json:"CategoryFilter,omitempty"`
-	ManufacturerFilter     []FilterId               `json:"ManufacturerFilter,omitempty"`
-	StatusFilter           []FilterId               `json:"StatusFilter,omitempty"`
-	PackagingFilter        []FilterId               `json:"PackagingFilter,omitempty"`
-	MarketPlaceFilter      string                   `json:"MarketPlaceFilter,omitempty"`
-	SeriesFilter           []FilterId               `json:"SeriesFilter,omitempty"`
-	MinimumQuantityAvailable int                    `json:"MinimumQuantityAvailable,omitempty"`
-	SearchOptions          []string                 `json:"SearchOptions,omitempty"`
-	ParameterFilterRequest *ParameterFilterRequest  `json:"ParameterFilterRequest,omitempty"`
+	CategoryFilter           []FilterId              `json:"CategoryFilter,omitempty"`
+	ManufacturerFilter       []FilterId              `json:"ManufacturerFilter,omitempty"`
+	StatusFilter             []FilterId              `json:"StatusFilter,omitempty"`
+	PackagingFilter          []FilterId              `json:"PackagingFilter,omitempty"`
+	MarketPlaceFilter        string                  `json:"MarketPlaceFilter,omitempty"`
+	SeriesFilter             []FilterId              `json:"SeriesFilter,omitempty"`
+	MinimumQuantityAvailable int                     `json:"MinimumQuantityAvailable,omitempty"`
+	SearchOptions            []string                `json:"SearchOptions,omitempty"`
+	ParameterFilterRequest   *ParameterFilterRequest `json:"ParameterFilterRequest,omitempty"`
 }
 
 // ParameterFilterRequest represents a parameter filter request.
