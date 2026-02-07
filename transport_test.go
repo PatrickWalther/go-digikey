@@ -304,7 +304,7 @@ func TestClientDo(t *testing.T) {
 		if test.method == http.MethodPost {
 			_, _ = client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 		} else {
-			_, _ = client.ProductDetails(ctx, "123")
+			_, _ = client.Product.Details(ctx, "123")
 		}
 
 		cancel()

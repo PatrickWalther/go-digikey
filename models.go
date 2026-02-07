@@ -288,38 +288,6 @@ type AppliedFilter struct {
 	ValueText     string `json:"ValueText"`
 }
 
-// ProductDetailsResponse represents a product details response.
-type ProductDetailsResponse struct {
-	Product          Product      `json:"Product"`
-	SearchLocaleUsed SearchLocale `json:"SearchLocaleUsed"`
-}
-
-// --- Associations ---
-
-// ProductSummary represents a summarized product in an association.
-type ProductSummary struct {
-	ProductUrl                string       `json:"ProductUrl"`
-	Description               string       `json:"Description"`
-	Manufacturer              Manufacturer `json:"Manufacturer"`
-	ManufacturerProductNumber string       `json:"ManufacturerProductNumber"`
-	UnitPrice                 string       `json:"UnitPrice"`
-	QuantityAvailable         int          `json:"QuantityAvailable"`
-}
-
-// ProductAssociations represents product association groups.
-type ProductAssociations struct {
-	Kits               []ProductSummary `json:"Kits"`
-	MatingProducts     []ProductSummary `json:"MatingProducts"`
-	AssociatedProducts []ProductSummary `json:"AssociatedProducts"`
-	ForUseWithProducts []ProductSummary `json:"ForUseWithProducts"`
-}
-
-// ProductAssociationsResponse represents a product associations response.
-type ProductAssociationsResponse struct {
-	ProductAssociations ProductAssociations `json:"ProductAssociations"`
-	SearchLocaleUsed    SearchLocale        `json:"SearchLocaleUsed"`
-}
-
 // --- Categories ---
 
 // CategoriesResponse represents a categories list response.
@@ -340,13 +308,6 @@ type CategoryResponse struct {
 // ManufacturersResponse represents a manufacturers list response.
 type ManufacturersResponse struct {
 	Manufacturers []Manufacturer `json:"Manufacturers"`
-}
-
-// --- Media ---
-
-// MediaResponse represents a product media response.
-type MediaResponse struct {
-	MediaLinks []MediaLink `json:"MediaLinks"`
 }
 
 // --- DigiReel Pricing ---
@@ -394,48 +355,3 @@ type PackageTypeByQuantityResponse struct {
 	Products []PackageTypeByQuantityProduct `json:"Products"`
 }
 
-// --- Recommended Products ---
-
-// RecommendedProduct represents a recommended product.
-type RecommendedProduct struct {
-	DigiKeyProductNumber      string  `json:"DigiKeyProductNumber"`
-	ManufacturerProductNumber string  `json:"ManufacturerProductNumber"`
-	ManufacturerName          string  `json:"ManufacturerName"`
-	PrimaryPhoto              string  `json:"PrimaryPhoto"`
-	ProductDescription        string  `json:"ProductDescription"`
-	QuantityAvailable         int     `json:"QuantityAvailable"`
-	UnitPrice                 float64 `json:"UnitPrice"`
-	ProductUrl                string  `json:"ProductUrl"`
-}
-
-// Recommendation represents a recommendation group.
-type Recommendation struct {
-	ProductNumber       string               `json:"ProductNumber"`
-	RecommendedProducts []RecommendedProduct `json:"RecommendedProducts"`
-	SearchLocaleUsed    SearchLocale         `json:"SearchLocaleUsed"`
-}
-
-// RecommendedProductsResponse represents a recommended products response.
-type RecommendedProductsResponse struct {
-	Recommendations []Recommendation `json:"Recommendations"`
-}
-
-// --- Substitutions ---
-
-// ProductSubstitute represents a product substitute.
-type ProductSubstitute struct {
-	SubstituteType            string       `json:"SubstituteType"`
-	ProductUrl                string       `json:"ProductUrl"`
-	Description               string       `json:"Description"`
-	Manufacturer              Manufacturer `json:"Manufacturer"`
-	ManufacturerProductNumber string       `json:"ManufacturerProductNumber"`
-	UnitPrice                 string       `json:"UnitPrice"`
-	QuantityAvailable         int          `json:"QuantityAvailable"`
-}
-
-// ProductSubstitutesResponse represents a product substitutes response.
-type ProductSubstitutesResponse struct {
-	ProductSubstitutesCount int                 `json:"ProductSubstitutesCount"`
-	ProductSubstitutes      []ProductSubstitute `json:"ProductSubstitutes"`
-	SearchLocaleUsed        SearchLocale        `json:"SearchLocaleUsed"`
-}

@@ -90,14 +90,14 @@ func ExampleClient_Manufacturers() {
 	}
 }
 
-func ExampleClient_Associations() {
+func ExampleProductService_Associations() {
 	client := digikey.NewClient(
 		os.Getenv("DIGIKEY_CLIENT_ID"),
 		os.Getenv("DIGIKEY_CLIENT_SECRET"),
 	)
 	defer client.Close()
 
-	resp, err := client.Associations(context.Background(), "497-15360-ND")
+	resp, err := client.Product.Associations(context.Background(), "497-15360-ND")
 	if err != nil {
 		fmt.Println("error:", err)
 		return
