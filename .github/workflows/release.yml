@@ -40,31 +40,28 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           body: |
-            ## go-digikey v${{ github.ref_name }}
-            
+            ## go-digikey ${{ github.ref_name }}
+
             ### Features
+            - Service-based architecture (`client.Search`, `client.Product`, `client.Category`, `client.Pricing`)
+            - All 11 DigiKey Product Search API v4 endpoints
             - OAuth2 client credentials authentication
-            - Keyword search and product details API
-            - Built-in caching (configurable TTL)
-            - Rate limiting with backoff retry
+            - Built-in caching with configurable TTL
+            - Automatic retries with exponential backoff
+            - Rate limiting (120/min, 1000/day)
             - Locale support (US, DE, JP, etc.)
-            - Comprehensive error handling
-            
-            ### Test Coverage
-            - 131 unit tests
-            - ~70% code coverage
-            - Multi-version Go support (1.22, 1.23)
-            
+
             ### Usage
             ```go
             client := digikey.NewClient(clientID, clientSecret)
-            
-            results, err := client.KeywordSearch(ctx, &digikey.SearchRequest{
+            defer client.Close()
+
+            results, err := client.Search.KeywordSearch(ctx, &digikey.SearchRequest{
               Keywords: "LED",
               Limit: 10,
             })
             ```
-            
-            See README.md for more details.
+
+            See README.md for full documentation.
           draft: false
           prerelease: false
