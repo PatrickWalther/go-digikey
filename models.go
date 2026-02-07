@@ -164,4 +164,3 @@ type Classifications struct {
 	ExportControlClassNumber string `json:"ExportControlClassNumber"`
 	HTSUSCode                string `json:"HtsusCode"`
 }
-

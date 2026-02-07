@@ -16,6 +16,7 @@ A Go client library for the [Digi-Key](https://www.digikey.com) Product Search A
 ## Features
 
 - **100% API coverage** — all 11 Product Search API v4 endpoints
+- **Service-based architecture** — endpoints grouped by domain (`client.Search`, `client.Product`, `client.Category`, `client.Pricing`)
 - OAuth 2.0 client credentials flow (2-legged authentication)
 - Automatic token caching and refresh with 401 auto-retry
 - In-memory response caching with configurable TTL
@@ -56,7 +57,7 @@ func main() {
     ctx := context.Background()
 
     // Search for products
-    results, err := client.KeywordSearch(ctx, &digikey.SearchRequest{
+    results, err := client.Search.KeywordSearch(ctx, &digikey.SearchRequest{
         Keywords: "STM32F4",
         Limit:    10,
     })
@@ -101,7 +102,7 @@ client := digikey.NewClient(
 
 ```go
 // Basic search
-results, err := client.KeywordSearch(ctx, &digikey.SearchRequest{
+results, err := client.Search.KeywordSearch(ctx, &digikey.SearchRequest{
     Keywords: "STM32F4",
     Limit:    10,
 })
@@ -114,7 +115,7 @@ results, err := digikey.NewSearch("STM32F4").
     Execute(ctx, client)
 
 // Search with filters (using spec-compliant FilterId types)
-results, err := client.KeywordSearch(ctx, &digikey.SearchRequest{
+results, err := client.Search.KeywordSearch(ctx, &digikey.SearchRequest{
     Keywords: "resistor",
     Limit:    10,
     FilterOptionsRequest: &digikey.FilterRequest{
@@ -130,7 +131,7 @@ results, err := client.KeywordSearch(ctx, &digikey.SearchRequest{
 ### Product Details
 
 ```go
-details, err := client.ProductDetails(ctx, "497-15360-ND")
+details, err := client.Product.Details(ctx, "497-15360-ND")
 if err != nil {
     log.Fatal(err)
 }
@@ -144,20 +145,20 @@ fmt.Printf("Stock: %d\n", details.Product.QuantityAvailable)
 
 ```go
 // Get all categories
-categories, err := client.Categories(ctx)
+categories, err := client.Category.List(ctx)
 for _, cat := range categories.Categories {
     fmt.Printf("%s (%d products)\n", cat.Name, cat.ProductCount)
 }
 
 // Get a specific category by ID
-category, err := client.CategoriesById(ctx, 42)
+category, err := client.Category.GetByID(ctx, 42)
 fmt.Printf("Category: %s\n", category.Category.Name)
 ```
 
 ### Manufacturers
 
 ```go
-manufacturers, err := client.Manufacturers(ctx)
+manufacturers, err := client.Category.Manufacturers(ctx)
 for _, mfg := range manufacturers.Manufacturers {
     fmt.Printf("%s (ID: %d)\n", mfg.Name, mfg.ID)
 }
@@ -166,7 +167,7 @@ for _, mfg := range manufacturers.Manufacturers {
 ### Associations
 
 ```go
-assoc, err := client.Associations(ctx, "497-15360-ND")
+assoc, err := client.Product.Associations(ctx, "497-15360-ND")
 for _, mate := range assoc.ProductAssociations.MatingProducts {
     fmt.Printf("Mating: %s\n", mate.ManufacturerProductNumber)
 }
@@ -175,7 +176,7 @@ for _, mate := range assoc.ProductAssociations.MatingProducts {
 ### Substitutions
 
 ```go
-subs, err := client.Substitutions(ctx, "497-15360-ND")
+subs, err := client.Product.Substitutions(ctx, "497-15360-ND")
 for _, sub := range subs.ProductSubstitutes {
     fmt.Printf("%s (%s): %s\n", sub.ManufacturerProductNumber, sub.SubstituteType, sub.UnitPrice)
 }
@@ -184,7 +185,7 @@ for _, sub := range subs.ProductSubstitutes {
 ### Media
 
 ```go
-media, err := client.Media(ctx, "497-15360-ND")
+media, err := client.Product.Media(ctx, "497-15360-ND")
 for _, link := range media.MediaLinks {
     fmt.Printf("%s: %s\n", link.MediaType, link.URL)
 }
@@ -193,7 +194,7 @@ for _, link := range media.MediaLinks {
 ### Recommended Products
 
 ```go
-recs, err := client.RecommendedProducts(ctx, "497-15360-ND")
+recs, err := client.Product.RecommendedProducts(ctx, "497-15360-ND")
 for _, rec := range recs.Recommendations {
     for _, p := range rec.RecommendedProducts {
         fmt.Printf("Recommended: %s ($%.2f)\n", p.DigiKeyProductNumber, p.UnitPrice)
@@ -204,7 +205,7 @@ for _, rec := range recs.Recommendations {
 ### DigiReel Pricing
 
 ```go
-pricing, err := client.DigiReelPricing(ctx, "497-15360-ND", 1000)
+pricing, err := client.Pricing.DigiReel(ctx, "497-15360-ND", 1000)
 fmt.Printf("Reeling fee: $%.2f, Unit: $%.4f, Extended: $%.2f\n",
     pricing.ReelingFee, pricing.UnitPrice, pricing.ExtendedPrice)
 ```
@@ -212,7 +213,7 @@ fmt.Printf("Reeling fee: $%.2f, Unit: $%.4f, Extended: $%.2f\n",
 ### Package Type by Quantity
 
 ```go
-pkgType, err := client.PackageTypeByQuantity(ctx, "497-15360-ND", 100, "CT")
+pkgType, err := client.Pricing.PackageTypeByQuantity(ctx, "497-15360-ND", 100, "CT")
 for _, p := range pkgType.Products {
     fmt.Printf("%s: %d available, types: %v\n",
         p.DigiKeyProductNumber, p.QuantityAvailable, p.PackageTypes)
@@ -243,7 +244,7 @@ fmt.Printf("Day: %d/%d remaining\n", stats.DayRemaining, stats.DayLimit)
 ```go
 import "errors"
 
-results, err := client.KeywordSearch(ctx, req)
+results, err := client.Search.KeywordSearch(ctx, req)
 if err != nil {
     if errors.Is(err, digikey.ErrRateLimitExceeded) {
         // Wait and retry
@@ -265,19 +266,19 @@ if err != nil {
 
 ## API Coverage
 
-| Endpoint | Method | Go Method |
-|----------|--------|-----------|
-| `/products/v4/search/keyword` | POST | `KeywordSearch()` |
-| `/products/v4/search/{productNumber}/productdetails` | GET | `ProductDetails()` |
-| `/products/v4/search/categories` | GET | `Categories()` |
-| `/products/v4/search/categories/{categoryId}` | GET | `CategoriesById()` |
-| `/products/v4/search/manufacturers` | GET | `Manufacturers()` |
-| `/products/v4/search/{productNumber}/associations` | GET | `Associations()` |
-| `/products/v4/search/{productNumber}/substitutions` | GET | `Substitutions()` |
-| `/products/v4/search/{productNumber}/media` | GET | `Media()` |
-| `/products/v4/search/{productNumber}/recommendedproducts` | GET | `RecommendedProducts()` |
-| `/products/v4/search/{productNumber}/digireelpricing` | GET | `DigiReelPricing()` |
-| `/products/v4/search/packagetypebyquantity/{productNumber}` | GET | `PackageTypeByQuantity()` |
+| Endpoint | Method | Service Call |
+|----------|--------|-------------|
+| `/products/v4/search/keyword` | POST | `client.Search.KeywordSearch()` |
+| `/products/v4/search/{productNumber}/productdetails` | GET | `client.Product.Details()` |
+| `/products/v4/search/categories` | GET | `client.Category.List()` |
+| `/products/v4/search/categories/{categoryId}` | GET | `client.Category.GetByID()` |
+| `/products/v4/search/manufacturers` | GET | `client.Category.Manufacturers()` |
+| `/products/v4/search/{productNumber}/associations` | GET | `client.Product.Associations()` |
+| `/products/v4/search/{productNumber}/substitutions` | GET | `client.Product.Substitutions()` |
+| `/products/v4/search/{productNumber}/media` | GET | `client.Product.Media()` |
+| `/products/v4/search/{productNumber}/recommendedproducts` | GET | `client.Product.RecommendedProducts()` |
+| `/products/v4/search/{productNumber}/digireelpricing` | GET | `client.Pricing.DigiReel()` |
+| `/products/v4/search/packagetypebyquantity/{productNumber}` | GET | `client.Pricing.PackageTypeByQuantity()` |
 
 **11/11 endpoints** (100% coverage)
 
@@ -306,23 +307,20 @@ if err != nil {
 | `WithRetryConfig` | Custom retry configuration |
 | `WithoutRetry` | Disable retries |
 
+### Services
+
+| Service | Methods |
+|---------|---------|
+| `client.Search` | `KeywordSearch()` |
+| `client.Product` | `Details()`, `DetailsNoCache()`, `Associations()`, `Media()`, `Substitutions()`, `RecommendedProducts()` |
+| `client.Category` | `List()`, `GetByID()`, `Manufacturers()` |
+| `client.Pricing` | `DigiReel()`, `PackageTypeByQuantity()` |
+
 ### Client Methods
 
 | Method | Description |
 |--------|-------------|
 | `Close()` | Release resources (always call with `defer`) |
-| `KeywordSearch()` | Search products by keyword |
-| `ProductDetails()` | Get product details (cached) |
-| `ProductDetailsNoCache()` | Get product details (bypass cache) |
-| `Categories()` | Get all product categories (cached) |
-| `CategoriesById()` | Get a specific category (cached) |
-| `Manufacturers()` | Get all manufacturers (cached) |
-| `Associations()` | Get product associations (cached) |
-| `Substitutions()` | Get product substitutes (cached) |
-| `Media()` | Get product media links (cached) |
-| `RecommendedProducts()` | Get recommended products (cached) |
-| `DigiReelPricing()` | Get DigiReel pricing (not cached) |
-| `PackageTypeByQuantity()` | Get package types by quantity (not cached) |
 | `SetLocale()` | Change request locale |
 | `RateLimitStats()` | Get current rate limit usage |
 | `ClearCache()` | Clear all cached responses |
@@ -352,17 +350,17 @@ client := digikey.NewClient(
 client := digikey.NewClient(clientID, clientSecret, digikey.WithoutCache())
 
 // Force refresh (bypass cache)
-details, err := client.ProductDetailsNoCache(ctx, "497-15360-ND")
+details, err := client.Product.DetailsNoCache(ctx, "497-15360-ND")
 
 // Clear all cached data
 client.ClearCache()
 ```
 
 **Caching behavior by endpoint:**
-- **Cached (SearchTTL):** `KeywordSearch`
-- **Cached (DetailsTTL):** `ProductDetails`
-- **Cached (LookupTTL):** `Categories`, `CategoriesById`, `Manufacturers`, `Associations`, `Substitutions`, `Media`, `RecommendedProducts`
-- **Not cached:** `DigiReelPricing`, `PackageTypeByQuantity` (pricing is time-sensitive)
+- **Cached (SearchTTL):** `client.Search.KeywordSearch`
+- **Cached (DetailsTTL):** `client.Product.Details`
+- **Cached (LookupTTL):** `client.Category.List`, `client.Category.GetByID`, `client.Category.Manufacturers`, `client.Product.Associations`, `client.Product.Substitutions`, `client.Product.Media`, `client.Product.RecommendedProducts`
+- **Not cached:** `client.Pricing.DigiReel`, `client.Pricing.PackageTypeByQuantity` (pricing is time-sensitive)
 
 ## Retries
 
@@ -400,15 +398,24 @@ Digi-Key API enforces the following rate limits:
 
 The client tracks these limits locally and returns `ErrRateLimitExceeded` before making requests that would exceed them.
 
-## Breaking Changes in v0.2.0
+## Breaking Changes in v1.0.0
 
-- `FilterRequest.CategoryFilter`, `ManufacturerFilter`, `StatusFilter` changed from `[]int` to `[]FilterId`
-- `FilterRequest.PackageTypeFilter` renamed to `PackagingFilter` and changed from `[]int` to `[]FilterId`
-- `FilterRequest.ParameterFilterRequest` changed from `[]ParameterFilterRequest` to `*ParameterFilterRequest`
-- `ParameterFilterRequest` restructured with `CategoryFilter *FilterId` and `ParameterFilters []ParametricFilter`
-- `ParametricFilter` restructured with `FilterValues []FilterId` (was `ValueIDs []string`)
-- Removed `Filters` and `SortOptions` types (unused)
-- Use `NewFilterId(id)` and `NewFilterIds(ids...)` convenience constructors
+All endpoint methods moved from flat `Client` methods to service-based accessors:
+
+| v0.2.0 | v1.0.0 |
+|--------|--------|
+| `client.KeywordSearch()` | `client.Search.KeywordSearch()` |
+| `client.ProductDetails()` | `client.Product.Details()` |
+| `client.ProductDetailsNoCache()` | `client.Product.DetailsNoCache()` |
+| `client.Associations()` | `client.Product.Associations()` |
+| `client.Media()` | `client.Product.Media()` |
+| `client.Substitutions()` | `client.Product.Substitutions()` |
+| `client.RecommendedProducts()` | `client.Product.RecommendedProducts()` |
+| `client.Categories()` | `client.Category.List()` |
+| `client.CategoriesById()` | `client.Category.GetByID()` |
+| `client.Manufacturers()` | `client.Category.Manufacturers()` |
+| `client.DigiReelPricing()` | `client.Pricing.DigiReel()` |
+| `client.PackageTypeByQuantity()` | `client.Pricing.PackageTypeByQuantity()` |
 
 ## Testing
 

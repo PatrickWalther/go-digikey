@@ -4,6 +4,13 @@
 // OAuth 2.0 client credentials flow authentication, automatic token caching
 // and refresh, rate limiting, in-memory response caching, and locale support.
 //
+// Endpoints are organized into service groups accessed via the client:
+//
+//   - client.Search  — keyword search
+//   - client.Product — product details, associations, media, substitutions, recommendations
+//   - client.Category — categories and manufacturers
+//   - client.Pricing — DigiReel pricing and package type by quantity
+//
 // # Quick Start
 //
 // Create a client with your Digi-Key API credentials:
@@ -16,7 +23,7 @@
 //
 // Search for products:
 //
-//	results, err := client.KeywordSearch(ctx, &digikey.SearchRequest{
+//	results, err := client.Search.KeywordSearch(ctx, &digikey.SearchRequest{
 //	    Keywords: "STM32F4",
 //	    Limit:    10,
 //	})
@@ -29,15 +36,15 @@
 //
 // Get product details:
 //
-//	details, err := client.ProductDetails(ctx, "497-15360-ND")
+//	details, err := client.Product.Details(ctx, "497-15360-ND")
 //
 // Browse categories:
 //
-//	categories, err := client.Categories(ctx)
+//	categories, err := client.Category.List(ctx)
 //
 // Get manufacturers:
 //
-//	manufacturers, err := client.Manufacturers(ctx)
+//	manufacturers, err := client.Category.Manufacturers(ctx)
 //
 // # Authentication
 //
@@ -75,4 +82,4 @@
 package digikey
 
 // Version is the current version of the go-digikey package.
-const Version = "0.2.0"
+const Version = "1.0.0"
