@@ -5,7 +5,7 @@
 [![Tests](https://github.com/PatrickWalther/go-digikey/actions/workflows/test.yml/badge.svg)](https://github.com/PatrickWalther/go-digikey/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Go client library for the [Digi-Key](https://www.digikey.com) Product Search API v4. **100% API coverage of the official python package by digikey** — all 11 endpoints supported.
+A Go client library for the [Digi-Key](https://www.digikey.com) Product Search API v4.
 
 ## Requirements
 
@@ -15,7 +15,7 @@ A Go client library for the [Digi-Key](https://www.digikey.com) Product Search A
 
 ## Features
 
-- **100% API coverage** — all 11 Product Search API v4 endpoints
+- All 11 Product Search API v4 endpoints
 - **Service-based architecture** — endpoints grouped by domain (`client.Search`, `client.Product`, `client.Category`, `client.Pricing`)
 - OAuth 2.0 client credentials flow (2-legged authentication)
 - Automatic token caching and refresh with 401 auto-retry
@@ -280,7 +280,7 @@ if err != nil {
 | `/products/v4/search/{productNumber}/digireelpricing` | GET | `client.Pricing.DigiReel()` |
 | `/products/v4/search/packagetypebyquantity/{productNumber}` | GET | `client.Pricing.PackageTypeByQuantity()` |
 
-**11/11 endpoints** (100% coverage)
+**11/11 endpoints**
 
 ## Configuration
 
