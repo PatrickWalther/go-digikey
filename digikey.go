@@ -11,19 +11,19 @@
 //	    os.Getenv("DIGIKEY_CLIENT_ID"),
 //	    os.Getenv("DIGIKEY_CLIENT_SECRET"),
 //	)
+//	defer client.Close()
 //
 // Search for products:
 //
 //	results, err := client.KeywordSearch(ctx, &digikey.SearchRequest{
-//	    Keywords:    "STM32F4",
-//	    RecordCount: 10,
+//	    Keywords: "STM32F4",
+//	    Limit:    10,
 //	})
 //
 // Or use the fluent search builder:
 //
 //	results, err := digikey.NewSearch("STM32F4").
 //	    Limit(10).
-//	    FilterByManufacturer(1).
 //	    Execute(ctx, client)
 //
 // Get product details:
