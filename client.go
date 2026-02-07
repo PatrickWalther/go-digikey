@@ -16,6 +16,7 @@ type Client struct {
 	httpClient   *http.Client
 	baseURL      string
 	clientID     string
+	customerID   string
 	tokenURL     string
 	tokenManager *tokenManager
 	rateLimiter  *RateLimiter
@@ -96,6 +97,14 @@ func WithoutCache() ClientOption {
 func WithoutRetry() ClientOption {
 	return func(c *Client) {
 		c.retryConfig = NoRetry()
+	}
+}
+
+// WithCustomerID sets the customer ID for API requests.
+// When set, the X-DIGIKEY-Customer-Id header is included in all requests.
+func WithCustomerID(customerID string) ClientOption {
+	return func(c *Client) {
+		c.customerID = customerID
 	}
 }
 

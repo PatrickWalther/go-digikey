@@ -138,6 +138,9 @@ func (c *Client) setHeaders(req *http.Request, token string, locale Locale) {
 	req.Header.Set("X-DIGIKEY-Locale-Currency", locale.Currency)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
+	if c.customerID != "" {
+		req.Header.Set("X-DIGIKEY-Customer-Id", c.customerID)
+	}
 }
 
 // handleErrorResponse parses error responses from the API.

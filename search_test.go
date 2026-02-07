@@ -3,6 +3,7 @@ package digikey
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 )
@@ -107,6 +108,32 @@ func TestSearchOptionsWithFilterOptions(t *testing.T) {
 	}
 	if search.request.FilterOptionsRequest != filter {
 		t.Error("FilterOptionsRequest should be the same object")
+	}
+}
+
+// TestSearchOptionsWithIncludes tests WithIncludes builder method
+func TestSearchOptionsWithIncludes(t *testing.T) {
+	search := NewSearch("test").WithIncludes("DigiKeyProductNumber")
+	if search.request.Includes != "DigiKeyProductNumber" {
+		t.Errorf("expected Includes 'DigiKeyProductNumber', got '%s'", search.request.Includes)
+	}
+}
+
+// TestSearchRequestIncludesNotInJSON tests that Includes field is not serialized to JSON body
+func TestSearchRequestIncludesNotInJSON(t *testing.T) {
+	req := SearchRequest{
+		Keywords: "test",
+		Limit:    10,
+		Includes: "DigiKeyProductNumber",
+	}
+	data, err := json.Marshal(req)
+	if err != nil {
+		t.Fatalf("failed to marshal: %v", err)
+	}
+	// Includes should not appear in JSON (tagged with json:"-")
+	s := string(data)
+	if strings.Contains(s, "Includes") || strings.Contains(s, "DigiKeyProductNumber") {
+		t.Errorf("Includes should not be serialized to JSON, got %s", s)
 	}
 }
 

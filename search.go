@@ -41,8 +41,13 @@ func (c *Client) KeywordSearch(ctx context.Context, req *SearchRequest) (*Search
 		}
 	}
 
+	path := searchBasePath + "/keyword"
+	if searchReq.Includes != "" {
+		path += "?includes=" + searchReq.Includes
+	}
+
 	var resp SearchResponse
-	err := c.do(ctx, http.MethodPost, searchBasePath+"/keyword", &searchReq, &resp)
+	err := c.do(ctx, http.MethodPost, path, &searchReq, &resp)
 	if err != nil {
 		return nil, err
 	}
@@ -97,6 +102,12 @@ func (s *SearchOptions) Offset(position int) *SearchOptions {
 // WithFilterOptions sets filter options.
 func (s *SearchOptions) WithFilterOptions(filterRequest *FilterRequest) *SearchOptions {
 	s.request.FilterOptionsRequest = filterRequest
+	return s
+}
+
+// WithIncludes sets the includes query parameter for additional response data.
+func (s *SearchOptions) WithIncludes(includes string) *SearchOptions {
+	s.request.Includes = includes
 	return s
 }
 

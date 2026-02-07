@@ -33,6 +33,48 @@ func TestClientSetHeaders(t *testing.T) {
 	_, _ = client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 }
 
+// TestClientCustomerIdHeader tests that X-DIGIKEY-Customer-Id header is set when customerID is configured.
+func TestClientCustomerIdHeader(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		customerID := r.Header.Get("X-DIGIKEY-Customer-Id")
+		if customerID != "CUST-123" {
+			t.Errorf("expected X-DIGIKEY-Customer-Id 'CUST-123', got '%s'", customerID)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"Products":[]}`))
+	}))
+	defer server.Close()
+
+	client := NewClient("test-id", "test-secret", WithBaseURL(server.URL), WithCustomerID("CUST-123"))
+	defer client.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, _ = client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+}
+
+// TestClientCustomerIdHeaderAbsent tests that X-DIGIKEY-Customer-Id header is absent when not configured.
+func TestClientCustomerIdHeaderAbsent(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		customerID := r.Header.Get("X-DIGIKEY-Customer-Id")
+		if customerID != "" {
+			t.Errorf("expected no X-DIGIKEY-Customer-Id header, got '%s'", customerID)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"Products":[]}`))
+	}))
+	defer server.Close()
+
+	client := NewClient("test-id", "test-secret", WithBaseURL(server.URL))
+	defer client.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, _ = client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+}
+
 // TestClientHandleErrorResponse tests error response handling
 func TestClientHandleErrorResponse(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

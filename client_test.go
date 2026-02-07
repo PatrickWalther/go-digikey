@@ -218,6 +218,26 @@ func TestClientWithCacheConfig(t *testing.T) {
 	}
 }
 
+// TestNewClientWithCustomerID tests WithCustomerID option.
+func TestNewClientWithCustomerID(t *testing.T) {
+	client := NewClient("test-id", "test-secret", WithCustomerID("12345"))
+	defer client.Close()
+
+	if client.customerID != "12345" {
+		t.Errorf("expected customer ID '12345', got '%s'", client.customerID)
+	}
+}
+
+// TestNewClientWithoutCustomerID tests that customer ID defaults to empty.
+func TestNewClientWithoutCustomerID(t *testing.T) {
+	client := NewClient("test-id", "test-secret")
+	defer client.Close()
+
+	if client.customerID != "" {
+		t.Errorf("expected empty customer ID, got '%s'", client.customerID)
+	}
+}
+
 // TestClientClose tests that Close works without error.
 func TestClientClose(t *testing.T) {
 	client := NewClient("test-id", "test-secret")
