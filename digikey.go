@@ -1,7 +1,8 @@
-// Package digikey provides a Go client for the Digi-Key API v4.
+// Package digikey provides a Go client for the Digi-Key Product Search API v4.
 //
-// The client supports OAuth 2.0 client credentials flow authentication,
-// automatic token caching and refresh, rate limiting, and locale support.
+// The client supports all 11 endpoints of the DigiKey Product Search API,
+// OAuth 2.0 client credentials flow authentication, automatic token caching
+// and refresh, rate limiting, in-memory response caching, and locale support.
 //
 // # Quick Start
 //
@@ -29,6 +30,14 @@
 // Get product details:
 //
 //	details, err := client.ProductDetails(ctx, "497-15360-ND")
+//
+// Browse categories:
+//
+//	categories, err := client.Categories(ctx)
+//
+// Get manufacturers:
+//
+//	manufacturers, err := client.Manufacturers(ctx)
 //
 // # Authentication
 //
@@ -66,4 +75,4 @@
 package digikey
 
 // Version is the current version of the go-digikey package.
-const Version = "0.1.0"
+const Version = "0.2.0"
