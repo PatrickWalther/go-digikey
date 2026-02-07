@@ -1,5 +1,7 @@
 package digikey
 
+import "fmt"
+
 // Product represents a Digi-Key product.
 type Product struct {
 	Description               Description        `json:"Description"`
@@ -171,43 +173,52 @@ type SearchRequest struct {
 	Limit                int            `json:"Limit,omitempty"`
 	Offset               int            `json:"Offset,omitempty"`
 	FilterOptionsRequest *FilterRequest `json:"FilterOptionsRequest,omitempty"`
+	Includes             string         `json:"-"` // query param, not body
 }
 
-// Filters represents search filters.
-type Filters struct {
-	CategoryIDs       []int              `json:"CategoryIds,omitempty"`
-	ManufacturerIDs   []int              `json:"ManufacturerIds,omitempty"`
-	StatusIDs         []int              `json:"StatusIds,omitempty"`
-	PackageTypeIDs    []int              `json:"PackageTypeIds,omitempty"`
-	ParametricFilters []ParametricFilter `json:"ParametricFilters,omitempty"`
+// FilterId represents a filter identifier used in API filter requests.
+// The DigiKey API expects filter IDs as objects with a string Id field.
+type FilterId struct {
+	Id string `json:"Id"`
 }
 
-// ParametricFilter represents a parametric filter.
-type ParametricFilter struct {
-	ParameterID int      `json:"ParameterId"`
-	ValueID     string   `json:"ValueId,omitempty"`
-	ValueIDs    []string `json:"ValueIds,omitempty"`
+// NewFilterId creates a FilterId from an integer.
+func NewFilterId(id int) FilterId {
+	return FilterId{Id: fmt.Sprintf("%d", id)}
 }
 
-// SortOptions represents sorting options.
-type SortOptions struct {
-	Field     string `json:"SortOption"`
-	Direction string `json:"Direction"`
+// NewFilterIds creates a slice of FilterId from integers.
+func NewFilterIds(ids ...int) []FilterId {
+	result := make([]FilterId, len(ids))
+	for i, id := range ids {
+		result[i] = NewFilterId(id)
+	}
+	return result
 }
 
 // FilterRequest represents a filter options request.
 type FilterRequest struct {
-	CategoryFilter         []int                    `json:"CategoryFilter,omitempty"`
-	ManufacturerFilter     []int                    `json:"ManufacturerFilter,omitempty"`
-	StatusFilter           []int                    `json:"StatusFilter,omitempty"`
-	PackageTypeFilter      []int                    `json:"PackageTypeFilter,omitempty"`
-	ParameterFilterRequest []ParameterFilterRequest `json:"ParameterFilterRequest,omitempty"`
+	CategoryFilter         []FilterId               `json:"CategoryFilter,omitempty"`
+	ManufacturerFilter     []FilterId               `json:"ManufacturerFilter,omitempty"`
+	StatusFilter           []FilterId               `json:"StatusFilter,omitempty"`
+	PackagingFilter        []FilterId               `json:"PackagingFilter,omitempty"`
+	MarketPlaceFilter      string                   `json:"MarketPlaceFilter,omitempty"`
+	SeriesFilter           []FilterId               `json:"SeriesFilter,omitempty"`
+	MinimumQuantityAvailable int                    `json:"MinimumQuantityAvailable,omitempty"`
+	SearchOptions          []string                 `json:"SearchOptions,omitempty"`
+	ParameterFilterRequest *ParameterFilterRequest  `json:"ParameterFilterRequest,omitempty"`
 }
 
 // ParameterFilterRequest represents a parameter filter request.
 type ParameterFilterRequest struct {
-	ParameterID int      `json:"ParameterId"`
-	ValueIDs    []string `json:"ValueIds,omitempty"`
+	CategoryFilter   *FilterId          `json:"CategoryFilter,omitempty"`
+	ParameterFilters []ParametricFilter `json:"ParameterFilters,omitempty"`
+}
+
+// ParametricFilter represents a parametric filter within a ParameterFilterRequest.
+type ParametricFilter struct {
+	ParameterID  int        `json:"ParameterId"`
+	FilterValues []FilterId `json:"FilterValues,omitempty"`
 }
 
 // SearchResponse represents a keyword search response.

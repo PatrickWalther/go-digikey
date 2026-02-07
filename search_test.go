@@ -99,7 +99,7 @@ func TestSearchOptionsBuild(t *testing.T) {
 // TestSearchOptionsWithFilterOptions tests WithFilterOptions builder method
 func TestSearchOptionsWithFilterOptions(t *testing.T) {
 	filter := &FilterRequest{
-		CategoryFilter: []int{1, 2},
+		CategoryFilter: NewFilterIds(1, 2),
 	}
 	search := NewSearch("test").WithFilterOptions(filter)
 	if search.request.FilterOptionsRequest == nil {

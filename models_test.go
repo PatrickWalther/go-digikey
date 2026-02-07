@@ -195,50 +195,130 @@ func TestProductDetailsResponse(t *testing.T) {
 	}
 }
 
-// TestFilters tests Filters structure.
-func TestFilters(t *testing.T) {
-	filters := Filters{
-		CategoryIDs:     []int{1, 2, 3},
-		ManufacturerIDs: []int{10, 20},
-		StatusIDs:       []int{1},
-		PackageTypeIDs:  []int{5, 6},
+// TestNewFilterId tests NewFilterId constructor.
+func TestNewFilterId(t *testing.T) {
+	f := NewFilterId(42)
+	if f.Id != "42" {
+		t.Errorf("expected Id '42', got '%s'", f.Id)
 	}
 
-	if len(filters.CategoryIDs) != 3 {
-		t.Errorf("expected 3 categories, got %d", len(filters.CategoryIDs))
-	}
-	if len(filters.ManufacturerIDs) != 2 {
-		t.Errorf("expected 2 manufacturers, got %d", len(filters.ManufacturerIDs))
+	f0 := NewFilterId(0)
+	if f0.Id != "0" {
+		t.Errorf("expected Id '0', got '%s'", f0.Id)
 	}
 }
 
-// TestSortOptions tests SortOptions structure.
-func TestSortOptions(t *testing.T) {
-	sort := SortOptions{
-		Field:     "DateAdded",
-		Direction: "Ascending",
+// TestNewFilterIds tests NewFilterIds constructor.
+func TestNewFilterIds(t *testing.T) {
+	ids := NewFilterIds(1, 2, 3)
+	if len(ids) != 3 {
+		t.Fatalf("expected 3 filter IDs, got %d", len(ids))
+	}
+	if ids[0].Id != "1" || ids[1].Id != "2" || ids[2].Id != "3" {
+		t.Errorf("unexpected IDs: %v", ids)
 	}
 
-	if sort.Field != "DateAdded" {
-		t.Errorf("expected sort field DateAdded, got %s", sort.Field)
-	}
-	if sort.Direction != "Ascending" {
-		t.Errorf("expected sort direction Ascending, got %s", sort.Direction)
+	empty := NewFilterIds()
+	if len(empty) != 0 {
+		t.Errorf("expected 0 filter IDs, got %d", len(empty))
 	}
 }
 
-// TestParametricFilter tests ParametricFilter structure.
-func TestParametricFilter(t *testing.T) {
+// TestFilterIdJSON tests FilterId JSON round-trip.
+func TestFilterIdJSON(t *testing.T) {
+	f := NewFilterId(100)
+	data, err := json.Marshal(f)
+	if err != nil {
+		t.Fatalf("failed to marshal FilterId: %v", err)
+	}
+
+	expected := `{"Id":"100"}`
+	if string(data) != expected {
+		t.Errorf("expected JSON %s, got %s", expected, string(data))
+	}
+
+	var decoded FilterId
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("failed to unmarshal FilterId: %v", err)
+	}
+	if decoded.Id != "100" {
+		t.Errorf("expected Id '100', got '%s'", decoded.Id)
+	}
+}
+
+// TestFilterRequestJSON tests FilterRequest JSON round-trip with all fields.
+func TestFilterRequestJSON(t *testing.T) {
+	req := FilterRequest{
+		CategoryFilter:           NewFilterIds(1, 2),
+		ManufacturerFilter:       NewFilterIds(10),
+		StatusFilter:             NewFilterIds(0),
+		PackagingFilter:          NewFilterIds(5, 6),
+		MarketPlaceFilter:        "US",
+		SeriesFilter:             NewFilterIds(99),
+		MinimumQuantityAvailable: 100,
+		SearchOptions:            []string{"InStock"},
+		ParameterFilterRequest: &ParameterFilterRequest{
+			CategoryFilter:   &FilterId{Id: "1"},
+			ParameterFilters: []ParametricFilter{
+				{ParameterID: 100, FilterValues: NewFilterIds(200, 201)},
+			},
+		},
+	}
+
+	data, err := json.Marshal(req)
+	if err != nil {
+		t.Fatalf("failed to marshal FilterRequest: %v", err)
+	}
+
+	var decoded FilterRequest
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("failed to unmarshal FilterRequest: %v", err)
+	}
+
+	if len(decoded.CategoryFilter) != 2 {
+		t.Errorf("expected 2 category filters, got %d", len(decoded.CategoryFilter))
+	}
+	if decoded.MarketPlaceFilter != "US" {
+		t.Errorf("expected MarketPlaceFilter 'US', got '%s'", decoded.MarketPlaceFilter)
+	}
+	if decoded.MinimumQuantityAvailable != 100 {
+		t.Errorf("expected MinimumQuantityAvailable 100, got %d", decoded.MinimumQuantityAvailable)
+	}
+	if len(decoded.SearchOptions) != 1 || decoded.SearchOptions[0] != "InStock" {
+		t.Errorf("unexpected SearchOptions: %v", decoded.SearchOptions)
+	}
+	if decoded.ParameterFilterRequest == nil {
+		t.Fatal("expected non-nil ParameterFilterRequest")
+	}
+	if decoded.ParameterFilterRequest.CategoryFilter == nil || decoded.ParameterFilterRequest.CategoryFilter.Id != "1" {
+		t.Error("unexpected CategoryFilter in ParameterFilterRequest")
+	}
+}
+
+// TestFilterRequestOmitempty tests that empty fields are omitted in JSON.
+func TestFilterRequestOmitempty(t *testing.T) {
+	req := FilterRequest{}
+	data, err := json.Marshal(req)
+	if err != nil {
+		t.Fatalf("failed to marshal empty FilterRequest: %v", err)
+	}
+	if string(data) != "{}" {
+		t.Errorf("expected empty JSON object, got %s", string(data))
+	}
+}
+
+// TestParametricFilterStructure tests ParametricFilter structure.
+func TestParametricFilterStructure(t *testing.T) {
 	pf := ParametricFilter{
-		ParameterID: 100,
-		ValueIDs:    []string{"val1", "val2"},
+		ParameterID:  100,
+		FilterValues: NewFilterIds(200, 201),
 	}
 
 	if pf.ParameterID != 100 {
 		t.Errorf("expected parameter ID 100, got %d", pf.ParameterID)
 	}
-	if len(pf.ValueIDs) != 2 {
-		t.Errorf("expected 2 value IDs, got %d", len(pf.ValueIDs))
+	if len(pf.FilterValues) != 2 {
+		t.Errorf("expected 2 filter values, got %d", len(pf.FilterValues))
 	}
 }
 
