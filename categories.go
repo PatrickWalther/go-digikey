@@ -7,6 +7,9 @@ import (
 	"net/http"
 )
 
+// CategoryService handles category and manufacturer operations.
+type CategoryService service
+
 // Categories retrieves all product categories.
 func (c *Client) Categories(ctx context.Context) (*CategoriesResponse, error) {
 	// Check cache

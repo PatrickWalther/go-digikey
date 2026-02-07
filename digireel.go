@@ -7,6 +7,9 @@ import (
 	"net/url"
 )
 
+// PricingService handles pricing-related operations.
+type PricingService service
+
 // DigiReelPricing retrieves DigiReel pricing for a given product number and quantity.
 // This endpoint is not cached because pricing is time-sensitive.
 func (c *Client) DigiReelPricing(ctx context.Context, productNumber string, requestedQuantity int) (*DigiReelPricingResponse, error) {

@@ -11,6 +11,11 @@ const (
 	defaultTimeout = 30 * time.Second
 )
 
+// service is the base type shared by all API services.
+type service struct {
+	client *Client
+}
+
 // Client is the Digi-Key API client.
 type Client struct {
 	httpClient   *http.Client
@@ -25,6 +30,12 @@ type Client struct {
 	cacheConfig  CacheConfig
 	locale       Locale
 	localeMu     sync.RWMutex
+
+	common   service
+	Search   *SearchService
+	Product  *ProductService
+	Category *CategoryService
+	Pricing  *PricingService
 }
 
 // ClientOption configures a Client.
@@ -129,6 +140,12 @@ func NewClient(clientID, clientSecret string, opts ...ClientOption) *Client {
 	if c.cacheConfig.Enabled && c.cache == nil {
 		c.cache = NewMemoryCache(c.cacheConfig.DetailsTTL)
 	}
+
+	c.common.client = c
+	c.Search = (*SearchService)(&c.common)
+	c.Product = (*ProductService)(&c.common)
+	c.Category = (*CategoryService)(&c.common)
+	c.Pricing = (*PricingService)(&c.common)
 
 	return c
 }

@@ -7,6 +7,9 @@ import (
 	"net/url"
 )
 
+// ProductService handles product-related operations.
+type ProductService service
+
 // ProductDetails retrieves detailed information about a specific product.
 func (c *Client) ProductDetails(ctx context.Context, productNumber string) (*ProductDetailsResponse, error) {
 	if productNumber == "" {

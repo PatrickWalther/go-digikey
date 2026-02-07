@@ -7,6 +7,9 @@ import (
 	"net/http"
 )
 
+// SearchService handles keyword search operations.
+type SearchService service
+
 const (
 	searchBasePath = "/products/v4/search"
 )
