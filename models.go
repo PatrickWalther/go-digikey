@@ -293,3 +293,149 @@ type ProductDetailsResponse struct {
 	Product          Product      `json:"Product"`
 	SearchLocaleUsed SearchLocale `json:"SearchLocaleUsed"`
 }
+
+// --- Associations ---
+
+// ProductSummary represents a summarized product in an association.
+type ProductSummary struct {
+	ProductUrl                string       `json:"ProductUrl"`
+	Description               string       `json:"Description"`
+	Manufacturer              Manufacturer `json:"Manufacturer"`
+	ManufacturerProductNumber string       `json:"ManufacturerProductNumber"`
+	UnitPrice                 string       `json:"UnitPrice"`
+	QuantityAvailable         int          `json:"QuantityAvailable"`
+}
+
+// ProductAssociations represents product association groups.
+type ProductAssociations struct {
+	Kits               []ProductSummary `json:"Kits"`
+	MatingProducts     []ProductSummary `json:"MatingProducts"`
+	AssociatedProducts []ProductSummary `json:"AssociatedProducts"`
+	ForUseWithProducts []ProductSummary `json:"ForUseWithProducts"`
+}
+
+// ProductAssociationsResponse represents a product associations response.
+type ProductAssociationsResponse struct {
+	ProductAssociations ProductAssociations `json:"ProductAssociations"`
+	SearchLocaleUsed    SearchLocale        `json:"SearchLocaleUsed"`
+}
+
+// --- Categories ---
+
+// CategoriesResponse represents a categories list response.
+type CategoriesResponse struct {
+	ProductCount     int          `json:"ProductCount"`
+	Categories       []Category   `json:"Categories"`
+	SearchLocaleUsed SearchLocale `json:"SearchLocaleUsed"`
+}
+
+// CategoryResponse represents a single category response.
+type CategoryResponse struct {
+	Category         Category     `json:"Category"`
+	SearchLocaleUsed SearchLocale `json:"SearchLocaleUsed"`
+}
+
+// --- Manufacturers ---
+
+// ManufacturersResponse represents a manufacturers list response.
+type ManufacturersResponse struct {
+	Manufacturers []Manufacturer `json:"Manufacturers"`
+}
+
+// --- Media ---
+
+// MediaResponse represents a product media response.
+type MediaResponse struct {
+	MediaLinks []MediaLink `json:"MediaLinks"`
+}
+
+// --- DigiReel Pricing ---
+
+// DigiReelPricingResponse represents a DigiReel pricing response.
+type DigiReelPricingResponse struct {
+	ReelingFee        float64      `json:"ReelingFee"`
+	UnitPrice         float64      `json:"UnitPrice"`
+	ExtendedPrice     float64      `json:"ExtendedPrice"`
+	RequestedQuantity int          `json:"RequestedQuantity"`
+	SearchLocaleUsed  SearchLocale `json:"SearchLocaleUsed"`
+}
+
+// --- Package Type by Quantity ---
+
+// PackageTypeByQuantityProduct represents a product in a package type by quantity response.
+type PackageTypeByQuantityProduct struct {
+	RecommendedQuantity           int          `json:"RecommendedQuantity"`
+	DigiKeyProductNumber          string       `json:"DigiKeyProductNumber"`
+	QuantityAvailable             int          `json:"QuantityAvailable"`
+	ProductDescription            string       `json:"ProductDescription"`
+	DetailedDescription           string       `json:"DetailedDescription"`
+	ManufacturerName              string       `json:"ManufacturerName"`
+	ManufacturerProductNumber     string       `json:"ManufacturerProductNumber"`
+	MinimumOrderQuantity          int          `json:"MinimumOrderQuantity"`
+	PrimaryDatasheetUrl           string       `json:"PrimaryDatasheetUrl"`
+	PrimaryPhotoUrl               string       `json:"PrimaryPhotoUrl"`
+	ProductStatus                 string       `json:"ProductStatus"`
+	ManufacturerLeadWeeks         string       `json:"ManufacturerLeadWeeks"`
+	ManufacturerWarehouseQuantity int          `json:"ManufacturerWarehouseQuantity"`
+	RohsStatus                    string       `json:"RohsStatus"`
+	RoHSCompliant                 bool         `json:"RoHSCompliant"`
+	QuantityOnOrder               int          `json:"QuantityOnOrder"`
+	StandardPricing               []PriceBreak `json:"StandardPricing"`
+	MyPricing                     []PriceBreak `json:"MyPricing"`
+	ProductUrl                    string       `json:"ProductUrl"`
+	MarketPlace                   bool         `json:"MarketPlace"`
+	Supplier                      string       `json:"Supplier"`
+	StockNote                     string       `json:"StockNote"`
+	PackageTypes                  []string     `json:"PackageTypes"`
+}
+
+// PackageTypeByQuantityResponse represents a package type by quantity response.
+type PackageTypeByQuantityResponse struct {
+	Products []PackageTypeByQuantityProduct `json:"Products"`
+}
+
+// --- Recommended Products ---
+
+// RecommendedProduct represents a recommended product.
+type RecommendedProduct struct {
+	DigiKeyProductNumber      string  `json:"DigiKeyProductNumber"`
+	ManufacturerProductNumber string  `json:"ManufacturerProductNumber"`
+	ManufacturerName          string  `json:"ManufacturerName"`
+	PrimaryPhoto              string  `json:"PrimaryPhoto"`
+	ProductDescription        string  `json:"ProductDescription"`
+	QuantityAvailable         int     `json:"QuantityAvailable"`
+	UnitPrice                 float64 `json:"UnitPrice"`
+	ProductUrl                string  `json:"ProductUrl"`
+}
+
+// Recommendation represents a recommendation group.
+type Recommendation struct {
+	ProductNumber       string               `json:"ProductNumber"`
+	RecommendedProducts []RecommendedProduct `json:"RecommendedProducts"`
+	SearchLocaleUsed    SearchLocale         `json:"SearchLocaleUsed"`
+}
+
+// RecommendedProductsResponse represents a recommended products response.
+type RecommendedProductsResponse struct {
+	Recommendations []Recommendation `json:"Recommendations"`
+}
+
+// --- Substitutions ---
+
+// ProductSubstitute represents a product substitute.
+type ProductSubstitute struct {
+	SubstituteType            string       `json:"SubstituteType"`
+	ProductUrl                string       `json:"ProductUrl"`
+	Description               string       `json:"Description"`
+	Manufacturer              Manufacturer `json:"Manufacturer"`
+	ManufacturerProductNumber string       `json:"ManufacturerProductNumber"`
+	UnitPrice                 string       `json:"UnitPrice"`
+	QuantityAvailable         int          `json:"QuantityAvailable"`
+}
+
+// ProductSubstitutesResponse represents a product substitutes response.
+type ProductSubstitutesResponse struct {
+	ProductSubstitutesCount int                 `json:"ProductSubstitutesCount"`
+	ProductSubstitutes      []ProductSubstitute `json:"ProductSubstitutes"`
+	SearchLocaleUsed        SearchLocale        `json:"SearchLocaleUsed"`
+}

@@ -402,6 +402,50 @@ func TestMemoryCacheDeleteRemovesEntry(t *testing.T) {
 	}
 }
 
+// TestDefaultCacheConfigLookupTTL tests that LookupTTL defaults to 15 minutes.
+func TestDefaultCacheConfigLookupTTL(t *testing.T) {
+	config := DefaultCacheConfig()
+	if config.LookupTTL != 15*time.Minute {
+		t.Errorf("expected LookupTTL 15m, got %v", config.LookupTTL)
+	}
+}
+
+// TestCacheKeyForLookup tests cache key generation for lookup endpoints.
+func TestCacheKeyForLookup(t *testing.T) {
+	locale := Locale{Site: "US", Language: "en", Currency: "USD"}
+
+	// Same inputs produce same key
+	key1 := cacheKeyForLookup(locale, "categories", "all")
+	key2 := cacheKeyForLookup(locale, "categories", "all")
+	if key1 != key2 {
+		t.Error("cache keys should be consistent")
+	}
+
+	// Different prefix produces different key
+	key3 := cacheKeyForLookup(locale, "manufacturers", "all")
+	if key1 == key3 {
+		t.Error("different prefixes should produce different keys")
+	}
+
+	// Different identifier produces different key
+	key4 := cacheKeyForLookup(locale, "categories", "42")
+	if key1 == key4 {
+		t.Error("different identifiers should produce different keys")
+	}
+
+	// Different locale produces different key
+	locale2 := Locale{Site: "DE", Language: "de", Currency: "EUR"}
+	key5 := cacheKeyForLookup(locale2, "categories", "all")
+	if key1 == key5 {
+		t.Error("different locales should produce different keys")
+	}
+
+	// Key format contains prefix and identifier
+	if !strings.Contains(key1, "categories") || !strings.Contains(key1, "all") {
+		t.Errorf("key should contain prefix and identifier, got %s", key1)
+	}
+}
+
 // TestMemoryCacheSizeAccuracy tests that Size returns correct count
 func TestMemoryCacheSizeAccuracy(t *testing.T) {
 	cache := NewMemoryCache(5 * time.Minute)

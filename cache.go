@@ -132,6 +132,7 @@ type CacheConfig struct {
 	Enabled    bool
 	SearchTTL  time.Duration // TTL for search results
 	DetailsTTL time.Duration // TTL for product details
+	LookupTTL  time.Duration // TTL for stable lookup endpoints (categories, manufacturers, etc.)
 }
 
 // DefaultCacheConfig returns the default cache configuration.
@@ -140,6 +141,7 @@ func DefaultCacheConfig() CacheConfig {
 		Enabled:    true,
 		SearchTTL:  5 * time.Minute,
 		DetailsTTL: 10 * time.Minute,
+		LookupTTL:  15 * time.Minute,
 	}
 }
 
@@ -153,4 +155,9 @@ func cacheKeyForSearch(locale Locale, req *SearchRequest) string {
 // cacheKeyForDetails generates a cache key for product details.
 func cacheKeyForDetails(locale Locale, productNumber string) string {
 	return "details:" + locale.Site + ":" + locale.Currency + ":" + productNumber
+}
+
+// cacheKeyForLookup generates a cache key for stable lookup endpoints.
+func cacheKeyForLookup(locale Locale, prefix, identifier string) string {
+	return prefix + ":" + locale.Site + ":" + locale.Currency + ":" + identifier
 }

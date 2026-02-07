@@ -356,3 +356,260 @@ func TestMediaLink(t *testing.T) {
 		t.Errorf("expected URL, got %s", link.URL)
 	}
 }
+
+// TestProductAssociationsResponseJSON tests ProductAssociationsResponse JSON round-trip.
+func TestProductAssociationsResponseJSON(t *testing.T) {
+	resp := ProductAssociationsResponse{
+		ProductAssociations: ProductAssociations{
+			MatingProducts: []ProductSummary{
+				{ManufacturerProductNumber: "ABC-123", UnitPrice: "1.50", QuantityAvailable: 100},
+			},
+		},
+		SearchLocaleUsed: SearchLocale{Site: "US", Language: "en", Currency: "USD"},
+	}
+
+	data, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("failed to marshal: %v", err)
+	}
+
+	var decoded ProductAssociationsResponse
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	if len(decoded.ProductAssociations.MatingProducts) != 1 {
+		t.Errorf("expected 1 mating product, got %d", len(decoded.ProductAssociations.MatingProducts))
+	}
+	if decoded.ProductAssociations.MatingProducts[0].UnitPrice != "1.50" {
+		t.Error("unit price mismatch")
+	}
+}
+
+// TestCategoriesResponseJSON tests CategoriesResponse JSON round-trip.
+func TestCategoriesResponseJSON(t *testing.T) {
+	resp := CategoriesResponse{
+		ProductCount: 5000,
+		Categories: []Category{
+			{CategoryID: 1, Name: "Resistors", ProductCount: 1000},
+		},
+		SearchLocaleUsed: SearchLocale{Site: "US"},
+	}
+
+	data, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("failed to marshal: %v", err)
+	}
+
+	var decoded CategoriesResponse
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	if decoded.ProductCount != 5000 {
+		t.Errorf("expected product count 5000, got %d", decoded.ProductCount)
+	}
+	if len(decoded.Categories) != 1 || decoded.Categories[0].Name != "Resistors" {
+		t.Error("category mismatch")
+	}
+}
+
+// TestCategoryResponseJSON tests CategoryResponse JSON round-trip.
+func TestCategoryResponseJSON(t *testing.T) {
+	resp := CategoryResponse{
+		Category:         Category{CategoryID: 42, Name: "Capacitors"},
+		SearchLocaleUsed: SearchLocale{Site: "DE"},
+	}
+
+	data, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("failed to marshal: %v", err)
+	}
+
+	var decoded CategoryResponse
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	if decoded.Category.CategoryID != 42 {
+		t.Errorf("expected category ID 42, got %d", decoded.Category.CategoryID)
+	}
+}
+
+// TestManufacturersResponseJSON tests ManufacturersResponse JSON round-trip.
+func TestManufacturersResponseJSON(t *testing.T) {
+	resp := ManufacturersResponse{
+		Manufacturers: []Manufacturer{
+			{ID: 1, Name: "Texas Instruments"},
+			{ID: 2, Name: "STMicroelectronics"},
+		},
+	}
+
+	data, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("failed to marshal: %v", err)
+	}
+
+	var decoded ManufacturersResponse
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	if len(decoded.Manufacturers) != 2 {
+		t.Errorf("expected 2 manufacturers, got %d", len(decoded.Manufacturers))
+	}
+}
+
+// TestMediaResponseJSON tests MediaResponse JSON round-trip.
+func TestMediaResponseJSON(t *testing.T) {
+	resp := MediaResponse{
+		MediaLinks: []MediaLink{
+			{MediaType: "Photo", Title: "Front", URL: "https://example.com/photo.jpg"},
+		},
+	}
+
+	data, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("failed to marshal: %v", err)
+	}
+
+	var decoded MediaResponse
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	if len(decoded.MediaLinks) != 1 || decoded.MediaLinks[0].MediaType != "Photo" {
+		t.Error("media link mismatch")
+	}
+}
+
+// TestDigiReelPricingResponseJSON tests DigiReelPricingResponse JSON round-trip.
+func TestDigiReelPricingResponseJSON(t *testing.T) {
+	resp := DigiReelPricingResponse{
+		ReelingFee:        7.00,
+		UnitPrice:         0.10,
+		ExtendedPrice:     107.00,
+		RequestedQuantity: 1000,
+		SearchLocaleUsed:  SearchLocale{Site: "US", Currency: "USD"},
+	}
+
+	data, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("failed to marshal: %v", err)
+	}
+
+	var decoded DigiReelPricingResponse
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	if decoded.ReelingFee != 7.00 {
+		t.Errorf("expected reeling fee 7.00, got %f", decoded.ReelingFee)
+	}
+	if decoded.RequestedQuantity != 1000 {
+		t.Errorf("expected requested quantity 1000, got %d", decoded.RequestedQuantity)
+	}
+}
+
+// TestPackageTypeByQuantityResponseJSON tests PackageTypeByQuantityResponse JSON round-trip.
+func TestPackageTypeByQuantityResponseJSON(t *testing.T) {
+	resp := PackageTypeByQuantityResponse{
+		Products: []PackageTypeByQuantityProduct{
+			{
+				DigiKeyProductNumber:      "123-ND",
+				ManufacturerProductNumber: "ABC",
+				QuantityAvailable:         500,
+				RoHSCompliant:             true,
+				StandardPricing:           []PriceBreak{{BreakQuantity: 1, UnitPrice: 0.50}},
+				PackageTypes:              []string{"Cut Tape", "Digi-Reel"},
+			},
+		},
+	}
+
+	data, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("failed to marshal: %v", err)
+	}
+
+	var decoded PackageTypeByQuantityResponse
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	if len(decoded.Products) != 1 {
+		t.Fatalf("expected 1 product, got %d", len(decoded.Products))
+	}
+	p := decoded.Products[0]
+	if !p.RoHSCompliant {
+		t.Error("expected RoHSCompliant true")
+	}
+	if len(p.PackageTypes) != 2 {
+		t.Errorf("expected 2 package types, got %d", len(p.PackageTypes))
+	}
+}
+
+// TestRecommendedProductsResponseJSON tests RecommendedProductsResponse JSON round-trip.
+func TestRecommendedProductsResponseJSON(t *testing.T) {
+	resp := RecommendedProductsResponse{
+		Recommendations: []Recommendation{
+			{
+				ProductNumber: "123-ND",
+				RecommendedProducts: []RecommendedProduct{
+					{DigiKeyProductNumber: "456-ND", UnitPrice: 1.25, QuantityAvailable: 200},
+				},
+				SearchLocaleUsed: SearchLocale{Site: "US"},
+			},
+		},
+	}
+
+	data, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("failed to marshal: %v", err)
+	}
+
+	var decoded RecommendedProductsResponse
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	if len(decoded.Recommendations) != 1 {
+		t.Fatalf("expected 1 recommendation, got %d", len(decoded.Recommendations))
+	}
+	if decoded.Recommendations[0].ProductNumber != "123-ND" {
+		t.Error("product number mismatch")
+	}
+}
+
+// TestProductSubstitutesResponseJSON tests ProductSubstitutesResponse JSON round-trip.
+func TestProductSubstitutesResponseJSON(t *testing.T) {
+	resp := ProductSubstitutesResponse{
+		ProductSubstitutesCount: 1,
+		ProductSubstitutes: []ProductSubstitute{
+			{
+				SubstituteType:            "Direct",
+				ManufacturerProductNumber: "ALT-123",
+				UnitPrice:                 "2.50",
+				QuantityAvailable:         300,
+				Manufacturer:              Manufacturer{ID: 5, Name: "Murata"},
+			},
+		},
+		SearchLocaleUsed: SearchLocale{Site: "US"},
+	}
+
+	data, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("failed to marshal: %v", err)
+	}
+
+	var decoded ProductSubstitutesResponse
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	if decoded.ProductSubstitutesCount != 1 {
+		t.Errorf("expected count 1, got %d", decoded.ProductSubstitutesCount)
+	}
+	if decoded.ProductSubstitutes[0].SubstituteType != "Direct" {
+		t.Error("substitute type mismatch")
+	}
+}
