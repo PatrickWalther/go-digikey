@@ -288,28 +288,6 @@ type AppliedFilter struct {
 	ValueText     string `json:"ValueText"`
 }
 
-// --- Categories ---
-
-// CategoriesResponse represents a categories list response.
-type CategoriesResponse struct {
-	ProductCount     int          `json:"ProductCount"`
-	Categories       []Category   `json:"Categories"`
-	SearchLocaleUsed SearchLocale `json:"SearchLocaleUsed"`
-}
-
-// CategoryResponse represents a single category response.
-type CategoryResponse struct {
-	Category         Category     `json:"Category"`
-	SearchLocaleUsed SearchLocale `json:"SearchLocaleUsed"`
-}
-
-// --- Manufacturers ---
-
-// ManufacturersResponse represents a manufacturers list response.
-type ManufacturersResponse struct {
-	Manufacturers []Manufacturer `json:"Manufacturers"`
-}
-
 // --- DigiReel Pricing ---
 
 // DigiReelPricingResponse represents a DigiReel pricing response.

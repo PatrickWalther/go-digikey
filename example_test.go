@@ -54,14 +54,14 @@ func ExampleClient_SetLocale() {
 	_ = client // subsequent API calls will use the DE locale
 }
 
-func ExampleClient_Categories() {
+func ExampleCategoryService_List() {
 	client := digikey.NewClient(
 		os.Getenv("DIGIKEY_CLIENT_ID"),
 		os.Getenv("DIGIKEY_CLIENT_SECRET"),
 	)
 	defer client.Close()
 
-	resp, err := client.Categories(context.Background())
+	resp, err := client.Category.List(context.Background())
 	if err != nil {
 		fmt.Println("error:", err)
 		return
@@ -72,14 +72,14 @@ func ExampleClient_Categories() {
 	}
 }
 
-func ExampleClient_Manufacturers() {
+func ExampleCategoryService_Manufacturers() {
 	client := digikey.NewClient(
 		os.Getenv("DIGIKEY_CLIENT_ID"),
 		os.Getenv("DIGIKEY_CLIENT_SECRET"),
 	)
 	defer client.Close()
 
-	resp, err := client.Manufacturers(context.Background())
+	resp, err := client.Category.Manufacturers(context.Background())
 	if err != nil {
 		fmt.Println("error:", err)
 		return
