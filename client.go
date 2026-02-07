@@ -16,6 +16,7 @@ type Client struct {
 	httpClient   *http.Client
 	baseURL      string
 	clientID     string
+	tokenURL     string
 	tokenManager *tokenManager
 	rateLimiter  *RateLimiter
 	retryConfig  RetryConfig
@@ -59,9 +60,7 @@ func WithRateLimiter(rateLimiter *RateLimiter) ClientOption {
 // WithTokenURL sets a custom token URL (useful for testing).
 func WithTokenURL(tokenURL string) ClientOption {
 	return func(c *Client) {
-		if c.tokenManager != nil {
-			c.tokenManager.tokenURL = tokenURL
-		}
+		c.tokenURL = tokenURL
 	}
 }
 
@@ -102,8 +101,6 @@ func WithoutRetry() ClientOption {
 
 // NewClient creates a new Digi-Key API client.
 func NewClient(clientID, clientSecret string, opts ...ClientOption) *Client {
-	cacheConfig := DefaultCacheConfig()
-
 	c := &Client{
 		httpClient:  &http.Client{Timeout: defaultTimeout},
 		baseURL:     defaultBaseURL,
@@ -111,22 +108,17 @@ func NewClient(clientID, clientSecret string, opts ...ClientOption) *Client {
 		locale:      DefaultLocale(),
 		rateLimiter: NewRateLimiter(),
 		retryConfig: DefaultRetryConfig(),
-		cacheConfig: cacheConfig,
+		cacheConfig: DefaultCacheConfig(),
 	}
 
 	for _, opt := range opts {
 		opt(c)
 	}
 
-	c.tokenManager = newTokenManager(c.httpClient, clientID, clientSecret, "")
+	c.tokenManager = newTokenManager(c.httpClient, clientID, clientSecret, c.tokenURL)
 
-	// Initialize default cache if caching is enabled and no custom cache was provided
 	if c.cacheConfig.Enabled && c.cache == nil {
 		c.cache = NewMemoryCache(c.cacheConfig.DetailsTTL)
-	}
-
-	for _, opt := range opts {
-		opt(c)
 	}
 
 	return c

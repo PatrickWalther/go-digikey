@@ -167,9 +167,26 @@ func TestClientWithRateLimiter(t *testing.T) {
 
 // TestClientWithTokenURL tests WithTokenURL option
 func TestClientWithTokenURL(t *testing.T) {
-	client := NewClient("id", "secret", WithTokenURL("https://custom.example.com/token"))
+	customURL := "https://custom.example.com/token"
+	client := NewClient("id", "secret", WithTokenURL(customURL))
 	if client == nil {
-		t.Error("expected non-nil client")
+		t.Fatal("expected non-nil client")
+	}
+	// Verify the token URL was passed through to the token manager
+	if client.tokenManager.tokenURL != customURL {
+		t.Errorf("expected token URL %s, got %s", customURL, client.tokenManager.tokenURL)
+	}
+}
+
+// TestNewClientOptionsAppliedOnce tests that options are not applied twice
+func TestNewClientOptionsAppliedOnce(t *testing.T) {
+	callCount := 0
+	counterOpt := func(c *Client) {
+		callCount++
+	}
+	NewClient("id", "secret", ClientOption(counterOpt))
+	if callCount != 1 {
+		t.Errorf("expected option to be applied once, got %d times", callCount)
 	}
 }
 
