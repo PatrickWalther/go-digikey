@@ -251,6 +251,245 @@ func TestIntegrationProductDetailsNoCache(t *testing.T) {
 	}
 }
 
+// TestIntegrationCategories tests the Categories endpoint.
+func TestIntegrationCategories(t *testing.T) {
+	skipIfNoCredentials(t)
+
+	client := newTestClient(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	resp, err := client.Categories(ctx)
+	if err != nil {
+		t.Fatalf("Categories failed: %v", err)
+	}
+
+	if resp == nil {
+		t.Fatal("expected non-nil response")
+	}
+
+	if len(resp.Categories) == 0 {
+		t.Error("expected at least one category")
+	}
+
+	t.Logf("Found %d categories (product count: %d)", len(resp.Categories), resp.ProductCount)
+}
+
+// TestIntegrationCategoriesById tests the CategoriesById endpoint.
+func TestIntegrationCategoriesById(t *testing.T) {
+	skipIfNoCredentials(t)
+
+	client := newTestClient(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// First get all categories to find a valid ID
+	cats, err := client.Categories(ctx)
+	if err != nil {
+		t.Fatalf("Categories failed: %v", err)
+	}
+	if len(cats.Categories) == 0 {
+		t.Skip("no categories found")
+	}
+
+	catID := cats.Categories[0].CategoryID
+
+	resp, err := client.CategoriesById(ctx, catID)
+	if err != nil {
+		t.Fatalf("CategoriesById failed: %v", err)
+	}
+
+	if resp == nil {
+		t.Fatal("expected non-nil response")
+	}
+
+	t.Logf("Category %d: %s", resp.Category.CategoryID, resp.Category.Name)
+}
+
+// TestIntegrationManufacturers tests the Manufacturers endpoint.
+func TestIntegrationManufacturers(t *testing.T) {
+	skipIfNoCredentials(t)
+
+	client := newTestClient(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	resp, err := client.Manufacturers(ctx)
+	if err != nil {
+		t.Fatalf("Manufacturers failed: %v", err)
+	}
+
+	if resp == nil {
+		t.Fatal("expected non-nil response")
+	}
+
+	if len(resp.Manufacturers) == 0 {
+		t.Error("expected at least one manufacturer")
+	}
+
+	t.Logf("Found %d manufacturers", len(resp.Manufacturers))
+}
+
+// TestIntegrationAssociations tests the Associations endpoint.
+func TestIntegrationAssociations(t *testing.T) {
+	skipIfNoCredentials(t)
+
+	client := newTestClient(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	productNumber := findProductNumber(t, client, ctx)
+
+	resp, err := client.Associations(ctx, productNumber)
+	if err != nil {
+		t.Fatalf("Associations failed: %v", err)
+	}
+
+	if resp == nil {
+		t.Fatal("expected non-nil response")
+	}
+
+	t.Logf("Associations for %s: kits=%d, mating=%d, associated=%d, forUseWith=%d",
+		productNumber,
+		len(resp.ProductAssociations.Kits),
+		len(resp.ProductAssociations.MatingProducts),
+		len(resp.ProductAssociations.AssociatedProducts),
+		len(resp.ProductAssociations.ForUseWithProducts))
+}
+
+// TestIntegrationMedia tests the Media endpoint.
+func TestIntegrationMedia(t *testing.T) {
+	skipIfNoCredentials(t)
+
+	client := newTestClient(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	productNumber := findProductNumber(t, client, ctx)
+
+	resp, err := client.Media(ctx, productNumber)
+	if err != nil {
+		t.Fatalf("Media failed: %v", err)
+	}
+
+	if resp == nil {
+		t.Fatal("expected non-nil response")
+	}
+
+	t.Logf("Media links for %s: %d", productNumber, len(resp.MediaLinks))
+}
+
+// TestIntegrationSubstitutions tests the Substitutions endpoint.
+func TestIntegrationSubstitutions(t *testing.T) {
+	skipIfNoCredentials(t)
+
+	client := newTestClient(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	productNumber := findProductNumber(t, client, ctx)
+
+	resp, err := client.Substitutions(ctx, productNumber)
+	if err != nil {
+		t.Fatalf("Substitutions failed: %v", err)
+	}
+
+	if resp == nil {
+		t.Fatal("expected non-nil response")
+	}
+
+	t.Logf("Substitutes for %s: %d", productNumber, resp.ProductSubstitutesCount)
+}
+
+// TestIntegrationRecommendedProducts tests the RecommendedProducts endpoint.
+func TestIntegrationRecommendedProducts(t *testing.T) {
+	skipIfNoCredentials(t)
+
+	client := newTestClient(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	productNumber := findProductNumber(t, client, ctx)
+
+	resp, err := client.RecommendedProducts(ctx, productNumber)
+	if err != nil {
+		t.Fatalf("RecommendedProducts failed: %v", err)
+	}
+
+	if resp == nil {
+		t.Fatal("expected non-nil response")
+	}
+
+	t.Logf("Recommendations for %s: %d", productNumber, len(resp.Recommendations))
+}
+
+// TestIntegrationDigiReelPricing tests the DigiReelPricing endpoint.
+func TestIntegrationDigiReelPricing(t *testing.T) {
+	skipIfNoCredentials(t)
+
+	client := newTestClient(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	productNumber := findProductNumber(t, client, ctx)
+
+	resp, err := client.DigiReelPricing(ctx, productNumber, 1000)
+	if err != nil {
+		// DigiReel pricing may not be available for all products
+		t.Logf("DigiReelPricing for %s: %v (may not support DigiReel)", productNumber, err)
+		return
+	}
+
+	if resp == nil {
+		t.Fatal("expected non-nil response")
+	}
+
+	t.Logf("DigiReel pricing for %s: fee=%.2f, unit=%.2f, extended=%.2f",
+		productNumber, resp.ReelingFee, resp.UnitPrice, resp.ExtendedPrice)
+}
+
+// TestIntegrationPackageTypeByQuantity tests the PackageTypeByQuantity endpoint.
+func TestIntegrationPackageTypeByQuantity(t *testing.T) {
+	skipIfNoCredentials(t)
+
+	client := newTestClient(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	productNumber := findProductNumber(t, client, ctx)
+
+	resp, err := client.PackageTypeByQuantity(ctx, productNumber, 100, "")
+	if err != nil {
+		t.Fatalf("PackageTypeByQuantity failed: %v", err)
+	}
+
+	if resp == nil {
+		t.Fatal("expected non-nil response")
+	}
+
+	t.Logf("Package types for %s: %d products", productNumber, len(resp.Products))
+}
+
+// findProductNumber is a helper that searches for a product and returns a DigiKey product number.
+func findProductNumber(t *testing.T, client *Client, ctx context.Context) string {
+	t.Helper()
+	searchResp, err := client.KeywordSearch(ctx, &SearchRequest{
+		Keywords: "resistor",
+		Limit:    1,
+	})
+	if err != nil {
+		t.Fatalf("KeywordSearch failed: %v", err)
+	}
+	if len(searchResp.Products) == 0 {
+		t.Skip("no products found")
+	}
+	product := searchResp.Products[0]
+	if len(product.ProductVariations) == 0 {
+		t.Skip("product has no variations")
+	}
+	return product.ProductVariations[0].DigiKeyProductNumber
+}
+
 // Helper functions
 
 func newTestClient(t *testing.T) *Client {
