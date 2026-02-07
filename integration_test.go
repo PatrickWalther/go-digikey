@@ -18,7 +18,7 @@ func TestIntegrationKeywordSearch(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	resp, err := client.KeywordSearch(ctx, &SearchRequest{
+	resp, err := client.Search.KeywordSearch(ctx, &SearchRequest{
 		Keywords: "transistor",
 		Limit:    5,
 	})
@@ -45,7 +45,7 @@ func TestIntegrationProductDetails(t *testing.T) {
 	defer cancel()
 
 	// First search for a product
-	searchResp, err := client.KeywordSearch(ctx, &SearchRequest{
+	searchResp, err := client.Search.KeywordSearch(ctx, &SearchRequest{
 		Keywords: "resistor",
 		Limit:    1,
 	})
@@ -67,7 +67,7 @@ func TestIntegrationProductDetails(t *testing.T) {
 	productNumber := product.ProductVariations[0].DigiKeyProductNumber
 
 	// Now get details for that product
-	resp, err := client.ProductDetails(ctx, productNumber)
+	resp, err := client.Product.Details(ctx, productNumber)
 
 	if err != nil {
 		t.Fatalf("ProductDetails failed: %v", err)
@@ -93,7 +93,7 @@ func TestIntegrationRateLimiterWithRealAPI(t *testing.T) {
 
 	// Make several requests and verify rate limiter works
 	for i := 0; i < 5; i++ {
-		_, err := client.KeywordSearch(ctx, &SearchRequest{
+		_, err := client.Search.KeywordSearch(ctx, &SearchRequest{
 			Keywords: "diode",
 			Limit:    1,
 		})
@@ -127,7 +127,7 @@ func TestIntegrationCaching(t *testing.T) {
 	}
 
 	// First call - hits API
-	resp1, err := client.KeywordSearch(ctx, req)
+	resp1, err := client.Search.KeywordSearch(ctx, req)
 	if err != nil {
 		t.Fatalf("first search failed: %v", err)
 	}
@@ -139,7 +139,7 @@ func TestIntegrationCaching(t *testing.T) {
 	stats1 := client.RateLimitStats()
 
 	// Second call - should be cached
-	_, err = client.KeywordSearch(ctx, req)
+	_, err = client.Search.KeywordSearch(ctx, req)
 	if err != nil {
 		t.Fatalf("second search failed: %v", err)
 	}
@@ -165,7 +165,7 @@ func TestIntegrationLocaleSupport(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	resp, err := client.KeywordSearch(ctx, &SearchRequest{
+	resp, err := client.Search.KeywordSearch(ctx, &SearchRequest{
 		Keywords: "capacitor",
 		Limit:    1,
 	})
@@ -194,7 +194,7 @@ func TestIntegrationAuthRefresh(t *testing.T) {
 	defer cancel()
 
 	for i := 0; i < 3; i++ {
-		_, err := client.KeywordSearch(ctx, &SearchRequest{
+		_, err := client.Search.KeywordSearch(ctx, &SearchRequest{
 			Keywords: "IC",
 			Limit:    1,
 		})
@@ -214,7 +214,7 @@ func TestIntegrationProductDetailsNoCache(t *testing.T) {
 	defer cancel()
 
 	// First search for a product
-	searchResp, err := client.KeywordSearch(ctx, &SearchRequest{
+	searchResp, err := client.Search.KeywordSearch(ctx, &SearchRequest{
 		Keywords: "LED",
 		Limit:    1,
 	})
@@ -235,13 +235,13 @@ func TestIntegrationProductDetailsNoCache(t *testing.T) {
 	productNumber := product.ProductVariations[0].DigiKeyProductNumber
 
 	// Get details (cached)
-	resp1, err := client.ProductDetails(ctx, productNumber)
+	resp1, err := client.Product.Details(ctx, productNumber)
 	if err != nil {
 		t.Fatalf("first details call failed: %v", err)
 	}
 
 	// Get details again without cache
-	resp2, err := client.ProductDetailsNoCache(ctx, productNumber)
+	resp2, err := client.Product.DetailsNoCache(ctx, productNumber)
 	if err != nil {
 		t.Fatalf("no-cache details call failed: %v", err)
 	}
@@ -259,7 +259,7 @@ func TestIntegrationCategories(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	resp, err := client.Categories(ctx)
+	resp, err := client.Category.List(ctx)
 	if err != nil {
 		t.Fatalf("Categories failed: %v", err)
 	}
@@ -284,7 +284,7 @@ func TestIntegrationCategoriesById(t *testing.T) {
 	defer cancel()
 
 	// First get all categories to find a valid ID
-	cats, err := client.Categories(ctx)
+	cats, err := client.Category.List(ctx)
 	if err != nil {
 		t.Fatalf("Categories failed: %v", err)
 	}
@@ -294,7 +294,7 @@ func TestIntegrationCategoriesById(t *testing.T) {
 
 	catID := cats.Categories[0].CategoryID
 
-	resp, err := client.CategoriesById(ctx, catID)
+	resp, err := client.Category.GetByID(ctx, catID)
 	if err != nil {
 		t.Fatalf("CategoriesById failed: %v", err)
 	}
@@ -314,7 +314,7 @@ func TestIntegrationManufacturers(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	resp, err := client.Manufacturers(ctx)
+	resp, err := client.Category.Manufacturers(ctx)
 	if err != nil {
 		t.Fatalf("Manufacturers failed: %v", err)
 	}
@@ -340,7 +340,7 @@ func TestIntegrationAssociations(t *testing.T) {
 
 	productNumber := findProductNumber(t, client, ctx)
 
-	resp, err := client.Associations(ctx, productNumber)
+	resp, err := client.Product.Associations(ctx, productNumber)
 	if err != nil {
 		t.Fatalf("Associations failed: %v", err)
 	}
@@ -367,7 +367,7 @@ func TestIntegrationMedia(t *testing.T) {
 
 	productNumber := findProductNumber(t, client, ctx)
 
-	resp, err := client.Media(ctx, productNumber)
+	resp, err := client.Product.Media(ctx, productNumber)
 	if err != nil {
 		t.Fatalf("Media failed: %v", err)
 	}
@@ -389,7 +389,7 @@ func TestIntegrationSubstitutions(t *testing.T) {
 
 	productNumber := findProductNumber(t, client, ctx)
 
-	resp, err := client.Substitutions(ctx, productNumber)
+	resp, err := client.Product.Substitutions(ctx, productNumber)
 	if err != nil {
 		t.Fatalf("Substitutions failed: %v", err)
 	}
@@ -411,7 +411,7 @@ func TestIntegrationRecommendedProducts(t *testing.T) {
 
 	productNumber := findProductNumber(t, client, ctx)
 
-	resp, err := client.RecommendedProducts(ctx, productNumber)
+	resp, err := client.Product.RecommendedProducts(ctx, productNumber)
 	if err != nil {
 		t.Fatalf("RecommendedProducts failed: %v", err)
 	}
@@ -433,7 +433,7 @@ func TestIntegrationDigiReelPricing(t *testing.T) {
 
 	productNumber := findProductNumber(t, client, ctx)
 
-	resp, err := client.DigiReelPricing(ctx, productNumber, 1000)
+	resp, err := client.Pricing.DigiReel(ctx, productNumber, 1000)
 	if err != nil {
 		// DigiReel pricing may not be available for all products
 		t.Logf("DigiReelPricing for %s: %v (may not support DigiReel)", productNumber, err)
@@ -458,7 +458,7 @@ func TestIntegrationPackageTypeByQuantity(t *testing.T) {
 
 	productNumber := findProductNumber(t, client, ctx)
 
-	resp, err := client.PackageTypeByQuantity(ctx, productNumber, 100, "")
+	resp, err := client.Pricing.PackageTypeByQuantity(ctx, productNumber, 100, "")
 	if err != nil {
 		t.Fatalf("PackageTypeByQuantity failed: %v", err)
 	}
@@ -473,7 +473,7 @@ func TestIntegrationPackageTypeByQuantity(t *testing.T) {
 // findProductNumber is a helper that searches for a product and returns a DigiKey product number.
 func findProductNumber(t *testing.T, client *Client, ctx context.Context) string {
 	t.Helper()
-	searchResp, err := client.KeywordSearch(ctx, &SearchRequest{
+	searchResp, err := client.Search.KeywordSearch(ctx, &SearchRequest{
 		Keywords: "resistor",
 		Limit:    1,
 	})
