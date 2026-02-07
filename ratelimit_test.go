@@ -1,6 +1,7 @@
 package digikey
 
 import (
+	"strings"
 	"testing"
 	"time"
 )
@@ -212,13 +213,13 @@ func TestRateLimitErrorMessage(t *testing.T) {
 		t.Fatal("expected non-empty error message")
 	}
 
-	if !contains(msg, "rate limit") {
+	if !strings.Contains(msg, "rate limit") {
 		t.Errorf("error should mention rate limit: %s", msg)
 	}
-	if !contains(msg, "minute") {
+	if !strings.Contains(msg, "minute") {
 		t.Errorf("error should mention minute: %s", msg)
 	}
-	if !contains(msg, "120") {
+	if !strings.Contains(msg, "120") {
 		t.Errorf("error should mention limit: %s", msg)
 	}
 }
@@ -233,10 +234,10 @@ func TestRateLimitErrorDay(t *testing.T) {
 	}
 
 	msg := rle.Error()
-	if !contains(msg, "day") {
+	if !strings.Contains(msg, "day") {
 		t.Errorf("error should mention day: %s", msg)
 	}
-	if !contains(msg, "1000") {
+	if !strings.Contains(msg, "1000") {
 		t.Errorf("error should mention limit: %s", msg)
 	}
 }

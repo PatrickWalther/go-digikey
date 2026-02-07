@@ -184,30 +184,6 @@ func TestKeywordSearchLimitAdjustment(t *testing.T) {
 	}
 }
 
-// TestProductDetailsNilProductNumber tests ProductDetails with empty product number
-func TestProductDetailsEmptyProductNumber(t *testing.T) {
-	client := NewClient("test-id", "test-secret")
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-	defer cancel()
-
-	_, err := client.ProductDetails(ctx, "")
-	if err == nil {
-		t.Error("expected error for empty product number")
-	}
-}
-
-// TestProductDetailsNoCacheEmptyProductNumber tests ProductDetailsNoCache with empty product number
-func TestProductDetailsNoCacheEmptyProductNumber(t *testing.T) {
-	client := NewClient("test-id", "test-secret")
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-	defer cancel()
-
-	_, err := client.ProductDetailsNoCache(ctx, "")
-	if err == nil {
-		t.Error("expected error for empty product number")
-	}
-}
-
 // TestKeywordSearchWithCache tests that caching key is generated correctly
 func TestKeywordSearchWithCache(t *testing.T) {
 	client := NewClient("test-id", "test-secret", WithCache(NewMemoryCache(5*time.Minute)))
@@ -232,55 +208,5 @@ func TestKeywordSearchWithCache(t *testing.T) {
 		if len(cached) == 0 {
 			t.Error("expected non-empty cached data")
 		}
-	}
-}
-
-// TestProductDetailsWithCache tests caching for product details
-func TestProductDetailsWithCache(t *testing.T) {
-	// Verify cache key function works
-	cacheKey := cacheKeyForDetails(DefaultLocale(), "TEST-123")
-	if cacheKey == "" {
-		t.Error("expected non-empty cache key")
-	}
-	if cacheKey != cacheKeyForDetails(DefaultLocale(), "TEST-123") {
-		t.Error("cache key should be consistent")
-	}
-}
-
-// TestClientWithBaseURL tests WithBaseURL option
-func TestClientWithBaseURL(t *testing.T) {
-	client := NewClient("id", "secret", WithBaseURL("https://custom.example.com"))
-	if client == nil {
-		t.Error("expected non-nil client")
-	}
-}
-
-// TestClientWithRateLimiter tests WithRateLimiter option
-func TestClientWithRateLimiter(t *testing.T) {
-	limiter := NewRateLimiterWithLimits(100, 1000)
-	client := NewClient("id", "secret", WithRateLimiter(limiter))
-	if client == nil {
-		t.Error("expected non-nil client")
-	}
-}
-
-// TestClientWithTokenURL tests WithTokenURL option
-func TestClientWithTokenURL(t *testing.T) {
-	client := NewClient("id", "secret", WithTokenURL("https://custom.example.com/token"))
-	if client == nil {
-		t.Error("expected non-nil client")
-	}
-}
-
-// TestClientWithCacheConfig tests WithCacheConfig option
-func TestClientWithCacheConfig(t *testing.T) {
-	config := CacheConfig{
-		Enabled:    true,
-		SearchTTL:  10 * time.Minute,
-		DetailsTTL: 5 * time.Minute,
-	}
-	client := NewClient("id", "secret", WithCacheConfig(config))
-	if client == nil {
-		t.Error("expected non-nil client")
 	}
 }

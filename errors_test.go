@@ -2,6 +2,7 @@ package digikey
 
 import (
 	"errors"
+	"strings"
 	"testing"
 )
 
@@ -31,10 +32,10 @@ func TestAPIErrorErrorWithDetails(t *testing.T) {
 		t.Fatal("expected non-empty error string")
 	}
 
-	if !contains(errStr, "bad request") {
+	if !strings.Contains(errStr, "bad request") {
 		t.Errorf("expected error to contain message")
 	}
-	if !contains(errStr, "400") {
+	if !strings.Contains(errStr, "400") {
 		t.Errorf("expected error to contain status code")
 	}
 }
@@ -87,11 +88,11 @@ func TestAuthError(t *testing.T) {
 	}
 
 	errStr := err.Error()
-	if !contains(errStr, "invalid_client") {
+	if !strings.Contains(errStr, "invalid_client") {
 		t.Errorf("expected auth error to contain error code")
 	}
 
-	if !contains(errStr, "Client credentials") {
+	if !strings.Contains(errStr, "Client credentials") {
 		t.Errorf("expected auth error to contain description")
 	}
 }
@@ -103,7 +104,7 @@ func TestAuthErrorWithoutDescription(t *testing.T) {
 	}
 
 	errStr := err.Error()
-	if !contains(errStr, "invalid_client") {
+	if !strings.Contains(errStr, "invalid_client") {
 		t.Errorf("expected auth error to contain error code")
 	}
 }
@@ -129,15 +130,15 @@ func TestRateLimitError(t *testing.T) {
 	}
 
 	errStr := err.Error()
-	if !contains(errStr, "rate limit exceeded") {
+	if !strings.Contains(errStr, "rate limit exceeded") {
 		t.Errorf("expected rate limit error message")
 	}
 
-	if !contains(errStr, "1000") {
+	if !strings.Contains(errStr, "1000") {
 		t.Errorf("expected rate limit error to contain limit")
 	}
 
-	if !contains(errStr, "50") {
+	if !strings.Contains(errStr, "50") {
 		t.Errorf("expected rate limit error to contain remaining")
 	}
 }
@@ -174,12 +175,3 @@ func TestErrorVariables(t *testing.T) {
 	}
 }
 
-// Helper function to check if string contains substring
-func contains(s, substring string) bool {
-	for i := 0; i <= len(s)-len(substring); i++ {
-		if s[i:i+len(substring)] == substring {
-			return true
-		}
-	}
-	return false
-}

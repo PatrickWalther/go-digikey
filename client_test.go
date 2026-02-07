@@ -148,6 +148,44 @@ func TestClearCache(t *testing.T) {
 	client.ClearCache()
 }
 
+// TestClientWithBaseURL tests WithBaseURL option
+func TestClientWithBaseURL(t *testing.T) {
+	client := NewClient("id", "secret", WithBaseURL("https://custom.example.com"))
+	if client == nil {
+		t.Error("expected non-nil client")
+	}
+}
+
+// TestClientWithRateLimiter tests WithRateLimiter option
+func TestClientWithRateLimiter(t *testing.T) {
+	limiter := NewRateLimiterWithLimits(100, 1000)
+	client := NewClient("id", "secret", WithRateLimiter(limiter))
+	if client == nil {
+		t.Error("expected non-nil client")
+	}
+}
+
+// TestClientWithTokenURL tests WithTokenURL option
+func TestClientWithTokenURL(t *testing.T) {
+	client := NewClient("id", "secret", WithTokenURL("https://custom.example.com/token"))
+	if client == nil {
+		t.Error("expected non-nil client")
+	}
+}
+
+// TestClientWithCacheConfig tests WithCacheConfig option
+func TestClientWithCacheConfig(t *testing.T) {
+	config := CacheConfig{
+		Enabled:    true,
+		SearchTTL:  10 * time.Minute,
+		DetailsTTL: 5 * time.Minute,
+	}
+	client := NewClient("id", "secret", WithCacheConfig(config))
+	if client == nil {
+		t.Error("expected non-nil client")
+	}
+}
+
 // TestContextTimeout tests that context timeout is respected.
 func TestContextTimeout(t *testing.T) {
 	client := NewClient("test-id", "test-secret")

@@ -295,7 +295,6 @@ func TestClientStatusCodeHandling(t *testing.T) {
 
 // TestClientResponseBodyClosing tests that response body is properly closed
 func TestClientResponseBodyClosing(t *testing.T) {
-	bodyClosed := false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -310,7 +309,4 @@ func TestClientResponseBodyClosing(t *testing.T) {
 	defer cancel()
 
 	_, _ = client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
-
-	// If we get here without hanging, body was likely closed properly
-	_ = bodyClosed
 }
