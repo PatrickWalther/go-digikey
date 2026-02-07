@@ -143,6 +143,15 @@ func (c *Client) RateLimitStats() RateLimitStats {
 	return c.rateLimiter.Stats()
 }
 
+// Close releases resources held by the client.
+// Always call Close when done with the client to prevent goroutine leaks.
+func (c *Client) Close() error {
+	if mc, ok := c.cache.(*MemoryCache); ok {
+		mc.Close()
+	}
+	return nil
+}
+
 // ClearCache clears all cached responses.
 func (c *Client) ClearCache() {
 	if mc, ok := c.cache.(*MemoryCache); ok {

@@ -20,6 +20,7 @@ type MemoryCache struct {
 	mu      sync.RWMutex
 	entries map[string]*cacheEntry
 	ttl     time.Duration
+	done    chan struct{}
 }
 
 type cacheEntry struct {
@@ -28,10 +29,12 @@ type cacheEntry struct {
 }
 
 // NewMemoryCache creates a new in-memory cache with the specified default TTL.
+// Call Close when the cache is no longer needed to stop the background cleanup goroutine.
 func NewMemoryCache(defaultTTL time.Duration) *MemoryCache {
 	c := &MemoryCache{
 		entries: make(map[string]*cacheEntry),
 		ttl:     defaultTTL,
+		done:    make(chan struct{}),
 	}
 	go c.cleanupLoop()
 	return c
@@ -77,13 +80,24 @@ func (c *MemoryCache) Delete(key string) {
 	delete(c.entries, key)
 }
 
+// Close stops the background cleanup goroutine.
+// Always call Close when the cache is no longer needed to prevent goroutine leaks.
+func (c *MemoryCache) Close() {
+	close(c.done)
+}
+
 // cleanupLoop periodically removes expired entries.
 func (c *MemoryCache) cleanupLoop() {
 	ticker := time.NewTicker(time.Minute)
 	defer ticker.Stop()
 
-	for range ticker.C {
-		c.cleanup()
+	for {
+		select {
+		case <-c.done:
+			return
+		case <-ticker.C:
+			c.cleanup()
+		}
 	}
 }
 

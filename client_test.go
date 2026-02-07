@@ -203,6 +203,24 @@ func TestClientWithCacheConfig(t *testing.T) {
 	}
 }
 
+// TestClientClose tests that Close works without error.
+func TestClientClose(t *testing.T) {
+	client := NewClient("test-id", "test-secret")
+	err := client.Close()
+	if err != nil {
+		t.Errorf("expected no error from Close, got %v", err)
+	}
+}
+
+// TestClientCloseWithoutCache tests Close on a client with cache disabled.
+func TestClientCloseWithoutCache(t *testing.T) {
+	client := NewClient("test-id", "test-secret", WithoutCache())
+	err := client.Close()
+	if err != nil {
+		t.Errorf("expected no error from Close, got %v", err)
+	}
+}
+
 // TestContextTimeout tests that context timeout is respected.
 func TestContextTimeout(t *testing.T) {
 	client := NewClient("test-id", "test-secret")

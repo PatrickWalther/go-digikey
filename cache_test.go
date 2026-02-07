@@ -242,6 +242,20 @@ func TestCacheInterface(t *testing.T) {
 	var _ Cache = (*MemoryCache)(nil)
 }
 
+// TestMemoryCacheClose tests that Close stops the cleanup goroutine.
+func TestMemoryCacheClose(t *testing.T) {
+	cache := NewMemoryCache(5 * time.Minute)
+	cache.Set("key", []byte("value"), 1*time.Minute)
+
+	// Close should not panic
+	cache.Close()
+
+	// Cache should still be readable after Close (just no more cleanup)
+	if _, ok := cache.Get("key"); !ok {
+		t.Error("expected to still read cached data after Close")
+	}
+}
+
 // TestMemoryCacheCleanup tests that expired entries are cleaned up
 func TestMemoryCacheCleanup(t *testing.T) {
 	cache := NewMemoryCache(1 * time.Second)
