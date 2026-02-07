@@ -50,13 +50,14 @@ func main() {
         os.Getenv("DIGIKEY_CLIENT_ID"),
         os.Getenv("DIGIKEY_CLIENT_SECRET"),
     )
+    defer client.Close()
 
     ctx := context.Background()
 
     // Search for products
     results, err := client.KeywordSearch(ctx, &digikey.SearchRequest{
-        Keywords:    "STM32F4",
-        RecordCount: 10,
+        Keywords: "STM32F4",
+        Limit:    10,
     })
     if err != nil {
         log.Fatal(err)
@@ -77,6 +78,7 @@ func main() {
 ```go
 // Basic client with default options
 client := digikey.NewClient(clientID, clientSecret)
+defer client.Close()
 
 // Client with custom options
 client := digikey.NewClient(
@@ -98,16 +100,14 @@ client := digikey.NewClient(
 ```go
 // Basic search
 results, err := client.KeywordSearch(ctx, &digikey.SearchRequest{
-    Keywords:    "STM32F4",
-    RecordCount: 10,
+    Keywords: "STM32F4",
+    Limit:    10,
 })
 
 // Using the fluent builder
 results, err := digikey.NewSearch("STM32F4").
     Limit(20).
     Offset(0).
-    FilterByManufacturer(1).
-    WithSearchOptions("InStock").
     Execute(ctx, client)
 ```
 
@@ -199,6 +199,18 @@ if err != nil {
 | `WithRetryConfig` | Custom retry configuration |
 | `WithoutRetry` | Disable retries |
 
+### Client Methods
+
+| Method | Description |
+|--------|-------------|
+| `Close()` | Release resources (always call with `defer`) |
+| `KeywordSearch()` | Search products by keyword |
+| `ProductDetails()` | Get product details (cached) |
+| `ProductDetailsNoCache()` | Get product details (bypass cache) |
+| `SetLocale()` | Change request locale |
+| `RateLimitStats()` | Get current rate limit usage |
+| `ClearCache()` | Clear all cached responses |
+
 ## Caching
 
 The client includes in-memory caching with configurable TTL:
@@ -206,6 +218,7 @@ The client includes in-memory caching with configurable TTL:
 ```go
 // Default: caching enabled with 5min search TTL, 10min details TTL
 client := digikey.NewClient(clientID, clientSecret)
+defer client.Close()
 
 // Custom cache configuration
 client := digikey.NewClient(
