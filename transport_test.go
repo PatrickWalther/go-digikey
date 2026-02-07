@@ -25,6 +25,7 @@ func TestClientSetHeaders(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient("test-id", "test-secret", WithBaseURL(server.URL))
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -42,6 +43,7 @@ func TestClientHandleErrorResponse(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient("test-id", "test-secret", WithBaseURL(server.URL))
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -61,6 +63,7 @@ func TestClientHandleRateLimitError(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient("test-id", "test-secret", WithBaseURL(server.URL))
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -80,6 +83,7 @@ func TestClientRetryLogic(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient("test-id", "test-secret", WithBaseURL(server.URL))
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -98,6 +102,7 @@ func TestClientDisableRetry(t *testing.T) {
 		WithBaseURL(server.URL),
 		WithoutRetry(),
 	)
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -120,6 +125,7 @@ func TestClientCacheBypass(t *testing.T) {
 		WithBaseURL(server.URL),
 		WithCache(NewMemoryCache(5*time.Minute)),
 	)
+	defer client.Close()
 
 	// Cache can be cleared without error
 	client.ClearCache()
@@ -135,6 +141,7 @@ func TestClientResponseMalformed(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient("test-id", "test-secret", WithBaseURL(server.URL))
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -153,6 +160,7 @@ func TestClientEmptyResponse(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient("test-id", "test-secret", WithBaseURL(server.URL))
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -172,6 +180,7 @@ func TestClientReadBodyError(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient("test-id", "test-secret", WithBaseURL(server.URL))
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
 
@@ -187,6 +196,7 @@ func TestClientContextCancellation(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient("test-id", "test-secret", WithBaseURL(server.URL))
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
 
@@ -214,6 +224,7 @@ func TestClientHeadersNotModified(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient("test-id", "test-secret", WithBaseURL(server.URL))
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -255,6 +266,7 @@ func TestClientDo(t *testing.T) {
 		}
 
 		cancel()
+		client.Close()
 		server.Close()
 	}
 }
@@ -273,6 +285,7 @@ func TestClientStatusCodeHandling(t *testing.T) {
 	defer cancel()
 
 	_, _ = client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	client.Close()
 	server.Close()
 
 	// Test 400 Bad Request
@@ -290,6 +303,7 @@ func TestClientStatusCodeHandling(t *testing.T) {
 	if err == nil {
 		t.Error("expected error for 400 status")
 	}
+	client.Close()
 	server.Close()
 }
 
@@ -305,6 +319,7 @@ func TestClientResponseBodyClosing(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient("test-id", "test-secret", WithBaseURL(server.URL))
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

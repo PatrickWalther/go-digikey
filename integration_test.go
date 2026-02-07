@@ -266,6 +266,7 @@ func newTestClient(t *testing.T) *Client {
 		t.Fatal("failed to create client")
 	}
 
+	t.Cleanup(func() { client.Close() })
 	return client
 }
 

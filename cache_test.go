@@ -9,7 +9,7 @@ import (
 // TestMemoryCacheSet tests basic cache set operation.
 func TestMemoryCacheSet(t *testing.T) {
 	cache := NewMemoryCache(5 * time.Minute)
-	defer cache.Clear()
+	defer cache.Close()
 
 	key := "test:key"
 	value := []byte("test value")
@@ -24,7 +24,7 @@ func TestMemoryCacheSet(t *testing.T) {
 // TestMemoryCacheGet tests basic cache get operation.
 func TestMemoryCacheGet(t *testing.T) {
 	cache := NewMemoryCache(5 * time.Minute)
-	defer cache.Clear()
+	defer cache.Close()
 
 	key := "test:key"
 	value := []byte("test value")
@@ -44,6 +44,7 @@ func TestMemoryCacheGet(t *testing.T) {
 // TestMemoryCacheGetMissing tests cache get for missing key.
 func TestMemoryCacheGetMissing(t *testing.T) {
 	cache := NewMemoryCache(5 * time.Minute)
+	defer cache.Close()
 
 	_, ok := cache.Get("nonexistent")
 	if ok {
@@ -54,7 +55,7 @@ func TestMemoryCacheGetMissing(t *testing.T) {
 // TestMemoryCacheDelete tests cache delete operation.
 func TestMemoryCacheDelete(t *testing.T) {
 	cache := NewMemoryCache(5 * time.Minute)
-	defer cache.Clear()
+	defer cache.Close()
 
 	key := "test:key"
 	cache.Set(key, []byte("value"), 1*time.Minute)
@@ -78,7 +79,7 @@ func TestMemoryCacheDelete(t *testing.T) {
 // TestMemoryCacheTTL tests that expired entries are not returned.
 func TestMemoryCacheTTL(t *testing.T) {
 	cache := NewMemoryCache(5 * time.Minute)
-	defer cache.Clear()
+	defer cache.Close()
 
 	key := "test:key"
 	cache.Set(key, []byte("value"), 100*time.Millisecond)
@@ -101,7 +102,7 @@ func TestMemoryCacheTTL(t *testing.T) {
 // TestMemoryCacheDefaultTTL tests that default TTL is used when zero is passed.
 func TestMemoryCacheDefaultTTL(t *testing.T) {
 	cache := NewMemoryCache(100 * time.Millisecond)
-	defer cache.Clear()
+	defer cache.Close()
 
 	key := "test:key"
 	// Pass 0 as TTL to use default
@@ -125,7 +126,7 @@ func TestMemoryCacheDefaultTTL(t *testing.T) {
 // TestMemoryCacheMultipleEntries tests cache with multiple entries.
 func TestMemoryCacheMultipleEntries(t *testing.T) {
 	cache := NewMemoryCache(5 * time.Minute)
-	defer cache.Clear()
+	defer cache.Close()
 
 	entries := map[string][]byte{
 		"key1": []byte("value1"),
@@ -156,6 +157,7 @@ func TestMemoryCacheMultipleEntries(t *testing.T) {
 // TestMemoryCacheClear tests clearing all cache entries.
 func TestMemoryCacheClear(t *testing.T) {
 	cache := NewMemoryCache(5 * time.Minute)
+	defer cache.Close()
 
 	// Add multiple entries
 	for i := 0; i < 5; i++ {
@@ -176,7 +178,7 @@ func TestMemoryCacheClear(t *testing.T) {
 // TestMemoryCacheSize tests the Size method.
 func TestMemoryCacheSize(t *testing.T) {
 	cache := NewMemoryCache(5 * time.Minute)
-	defer cache.Clear()
+	defer cache.Close()
 
 	if cache.Size() != 0 {
 		t.Errorf("expected initial cache size 0, got %d", cache.Size())
@@ -194,7 +196,7 @@ func TestMemoryCacheSize(t *testing.T) {
 // TestMemoryCacheOverwrite tests overwriting existing cache entries.
 func TestMemoryCacheOverwrite(t *testing.T) {
 	cache := NewMemoryCache(5 * time.Minute)
-	defer cache.Clear()
+	defer cache.Close()
 
 	key := "test:key"
 
@@ -222,7 +224,7 @@ func TestMemoryCacheOverwrite(t *testing.T) {
 // TestMemoryCacheEmptyValue tests storing empty values.
 func TestMemoryCacheEmptyValue(t *testing.T) {
 	cache := NewMemoryCache(5 * time.Minute)
-	defer cache.Clear()
+	defer cache.Close()
 
 	key := "test:key"
 	cache.Set(key, []byte(""), 1*time.Minute)
@@ -259,6 +261,7 @@ func TestMemoryCacheClose(t *testing.T) {
 // TestMemoryCacheCleanup tests that expired entries are cleaned up
 func TestMemoryCacheCleanup(t *testing.T) {
 	cache := NewMemoryCache(1 * time.Second)
+	defer cache.Close()
 
 	// Set an entry with very short TTL
 	cache.Set("short-lived", []byte("data"), 100*time.Millisecond)
@@ -280,6 +283,7 @@ func TestMemoryCacheCleanup(t *testing.T) {
 // TestMemoryCacheLongLivedEntry tests long-lived entries are not expired
 func TestMemoryCacheLongLivedEntry(t *testing.T) {
 	cache := NewMemoryCache(10 * time.Second)
+	defer cache.Close()
 
 	cache.Set("long-lived", []byte("data"), 5*time.Second)
 
@@ -293,6 +297,7 @@ func TestMemoryCacheLongLivedEntry(t *testing.T) {
 // TestMemoryCacheCleanupWithMultipleEntries tests cleanup with multiple entries
 func TestMemoryCacheCleanupWithMultipleEntries(t *testing.T) {
 	cache := NewMemoryCache(1 * time.Second)
+	defer cache.Close()
 
 	// Set entries with different TTLs
 	cache.Set("expire-early", []byte("data1"), 50*time.Millisecond)
@@ -358,6 +363,7 @@ func TestCacheKeyFormat(t *testing.T) {
 // TestMemoryCacheClearRemovesAllEntries tests that Clear removes all entries
 func TestMemoryCacheClearRemovesAllEntries(t *testing.T) {
 	cache := NewMemoryCache(5 * time.Minute)
+	defer cache.Close()
 
 	cache.Set("key1", []byte("val1"), 1*time.Minute)
 	cache.Set("key2", []byte("val2"), 1*time.Minute)
@@ -382,6 +388,7 @@ func TestMemoryCacheClearRemovesAllEntries(t *testing.T) {
 // TestMemoryCacheDeleteRemovesEntry tests that Delete removes a specific entry
 func TestMemoryCacheDeleteRemovesEntry(t *testing.T) {
 	cache := NewMemoryCache(5 * time.Minute)
+	defer cache.Close()
 
 	cache.Set("delete-me", []byte("data"), 1*time.Minute)
 	if _, ok := cache.Get("delete-me"); !ok {
@@ -398,6 +405,7 @@ func TestMemoryCacheDeleteRemovesEntry(t *testing.T) {
 // TestMemoryCacheSizeAccuracy tests that Size returns correct count
 func TestMemoryCacheSizeAccuracy(t *testing.T) {
 	cache := NewMemoryCache(5 * time.Minute)
+	defer cache.Close()
 
 	if cache.Size() != 0 {
 		t.Errorf("new cache should be empty, got size %d", cache.Size())

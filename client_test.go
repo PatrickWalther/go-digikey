@@ -10,6 +10,7 @@ import (
 // TestNewClient tests client creation with default options.
 func TestNewClient(t *testing.T) {
 	client := NewClient("test-id", "test-secret")
+	defer client.Close()
 
 	if client == nil {
 		t.Fatal("expected non-nil client")
@@ -39,6 +40,7 @@ func TestNewClientWithCustomHTTPClient(t *testing.T) {
 	}
 
 	client := NewClient("test-id", "test-secret", WithHTTPClient(customHTTPClient))
+	defer client.Close()
 
 	if client.httpClient != customHTTPClient {
 		t.Error("expected same HTTP client instance")
@@ -53,6 +55,7 @@ func TestNewClientWithRetryConfig(t *testing.T) {
 	}
 
 	client := NewClient("test-id", "test-secret", WithRetryConfig(config))
+	defer client.Close()
 
 	if client.retryConfig.MaxRetries != 5 {
 		t.Errorf("expected max retries 5, got %d", client.retryConfig.MaxRetries)
@@ -68,6 +71,7 @@ func TestNewClientWithLocale(t *testing.T) {
 	}
 
 	client := NewClient("test-id", "test-secret", WithLocale(locale))
+	defer client.Close()
 
 	currentLocale := client.getLocale()
 	if currentLocale.Site != locale.Site {
@@ -79,6 +83,7 @@ func TestNewClientWithLocale(t *testing.T) {
 func TestNewClientWithCache(t *testing.T) {
 	cache := NewMemoryCache(5 * time.Minute)
 	client := NewClient("test-id", "test-secret", WithCache(cache))
+	defer client.Close()
 
 	if client.cache == nil {
 		t.Fatal("expected non-nil cache")
@@ -92,6 +97,7 @@ func TestNewClientWithCache(t *testing.T) {
 // TestNewClientWithCacheDisabled tests client creation with cache disabled.
 func TestNewClientWithCacheDisabled(t *testing.T) {
 	client := NewClient("test-id", "test-secret", WithoutCache())
+	defer client.Close()
 
 	if client.cacheConfig.Enabled {
 		t.Error("expected cache to be disabled")
@@ -101,6 +107,7 @@ func TestNewClientWithCacheDisabled(t *testing.T) {
 // TestNewClientWithRetryDisabled tests client creation with retry disabled.
 func TestNewClientWithRetryDisabled(t *testing.T) {
 	client := NewClient("test-id", "test-secret", WithoutRetry())
+	defer client.Close()
 
 	if client.retryConfig.MaxRetries != 0 {
 		t.Errorf("expected max retries 0, got %d", client.retryConfig.MaxRetries)
@@ -110,6 +117,7 @@ func TestNewClientWithRetryDisabled(t *testing.T) {
 // TestSetLocale tests locale changes.
 func TestSetLocale(t *testing.T) {
 	client := NewClient("test-id", "test-secret")
+	defer client.Close()
 
 	locale1 := client.getLocale()
 
@@ -133,6 +141,7 @@ func TestSetLocale(t *testing.T) {
 // TestRateLimitStats tests rate limit stats retrieval.
 func TestRateLimitStats(t *testing.T) {
 	client := NewClient("test-id", "test-secret")
+	defer client.Close()
 
 	stats := client.RateLimitStats()
 	if stats.MinuteUsed < 0 {
@@ -143,6 +152,7 @@ func TestRateLimitStats(t *testing.T) {
 // TestClearCache tests cache clearing.
 func TestClearCache(t *testing.T) {
 	client := NewClient("test-id", "test-secret")
+	defer client.Close()
 
 	// Should not panic
 	client.ClearCache()
@@ -151,6 +161,7 @@ func TestClearCache(t *testing.T) {
 // TestClientWithBaseURL tests WithBaseURL option
 func TestClientWithBaseURL(t *testing.T) {
 	client := NewClient("id", "secret", WithBaseURL("https://custom.example.com"))
+	defer client.Close()
 	if client == nil {
 		t.Error("expected non-nil client")
 	}
@@ -160,6 +171,7 @@ func TestClientWithBaseURL(t *testing.T) {
 func TestClientWithRateLimiter(t *testing.T) {
 	limiter := NewRateLimiterWithLimits(100, 1000)
 	client := NewClient("id", "secret", WithRateLimiter(limiter))
+	defer client.Close()
 	if client == nil {
 		t.Error("expected non-nil client")
 	}
@@ -169,6 +181,7 @@ func TestClientWithRateLimiter(t *testing.T) {
 func TestClientWithTokenURL(t *testing.T) {
 	customURL := "https://custom.example.com/token"
 	client := NewClient("id", "secret", WithTokenURL(customURL))
+	defer client.Close()
 	if client == nil {
 		t.Fatal("expected non-nil client")
 	}
@@ -184,7 +197,8 @@ func TestNewClientOptionsAppliedOnce(t *testing.T) {
 	counterOpt := func(c *Client) {
 		callCount++
 	}
-	NewClient("id", "secret", ClientOption(counterOpt))
+	client := NewClient("id", "secret", ClientOption(counterOpt))
+	defer client.Close()
 	if callCount != 1 {
 		t.Errorf("expected option to be applied once, got %d times", callCount)
 	}
@@ -198,6 +212,7 @@ func TestClientWithCacheConfig(t *testing.T) {
 		DetailsTTL: 5 * time.Minute,
 	}
 	client := NewClient("id", "secret", WithCacheConfig(config))
+	defer client.Close()
 	if client == nil {
 		t.Error("expected non-nil client")
 	}
@@ -224,6 +239,7 @@ func TestClientCloseWithoutCache(t *testing.T) {
 // TestContextTimeout tests that context timeout is respected.
 func TestContextTimeout(t *testing.T) {
 	client := NewClient("test-id", "test-secret")
+	defer client.Close()
 
 	// Create a context with very short timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Millisecond)

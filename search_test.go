@@ -113,6 +113,7 @@ func TestSearchOptionsWithFilterOptions(t *testing.T) {
 // TestSearchOptionsExecute tests Execute method
 func TestSearchOptionsExecute(t *testing.T) {
 	client := NewClient("test-id", "test-secret")
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
@@ -129,6 +130,7 @@ func TestSearchOptionsExecute(t *testing.T) {
 // TestKeywordSearchNilRequest tests KeywordSearch with nil request
 func TestKeywordSearchNilRequest(t *testing.T) {
 	client := NewClient("test-id", "test-secret")
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
@@ -144,6 +146,7 @@ func TestKeywordSearchNilRequest(t *testing.T) {
 // TestKeywordSearchEmptyKeywords tests KeywordSearch with empty keywords
 func TestKeywordSearchEmptyKeywords(t *testing.T) {
 	client := NewClient("test-id", "test-secret")
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
@@ -157,6 +160,7 @@ func TestKeywordSearchEmptyKeywords(t *testing.T) {
 // TestKeywordSearchLimitAdjustment tests that limits are clamped
 func TestKeywordSearchLimitAdjustment(t *testing.T) {
 	client := NewClient("test-id", "test-secret")
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
@@ -187,6 +191,7 @@ func TestKeywordSearchLimitAdjustment(t *testing.T) {
 // TestKeywordSearchWithCache tests that caching key is generated correctly
 func TestKeywordSearchWithCache(t *testing.T) {
 	client := NewClient("test-id", "test-secret", WithCache(NewMemoryCache(5*time.Minute)))
+	defer client.Close()
 
 	// Manually set cache entry to verify it's retrieved
 	req := &SearchRequest{Keywords: "test", Limit: 10}

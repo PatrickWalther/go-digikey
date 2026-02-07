@@ -9,6 +9,7 @@ import (
 // TestProductDetailsEmptyProductNumber tests ProductDetails with empty product number
 func TestProductDetailsEmptyProductNumber(t *testing.T) {
 	client := NewClient("test-id", "test-secret")
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
@@ -21,6 +22,7 @@ func TestProductDetailsEmptyProductNumber(t *testing.T) {
 // TestProductDetailsNoCacheEmptyProductNumber tests ProductDetailsNoCache with empty product number
 func TestProductDetailsNoCacheEmptyProductNumber(t *testing.T) {
 	client := NewClient("test-id", "test-secret")
+	defer client.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
