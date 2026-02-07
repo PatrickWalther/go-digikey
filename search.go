@@ -15,7 +15,7 @@ const (
 )
 
 // KeywordSearch searches for products using keywords.
-func (c *Client) KeywordSearch(ctx context.Context, req *SearchRequest) (*SearchResponse, error) {
+func (s *SearchService) KeywordSearch(ctx context.Context, req *SearchRequest) (*SearchResponse, error) {
 	if req == nil {
 		return nil, ErrInvalidRequest
 	}
@@ -23,6 +23,8 @@ func (c *Client) KeywordSearch(ctx context.Context, req *SearchRequest) (*Search
 	if req.Keywords == "" {
 		return nil, fmt.Errorf("%w: keywords are required", ErrInvalidRequest)
 	}
+
+	c := s.client
 
 	// Create a copy to avoid mutating the caller's request
 	searchReq := *req
@@ -121,5 +123,5 @@ func (s *SearchOptions) Build() *SearchRequest {
 
 // Execute performs the search using the provided client.
 func (s *SearchOptions) Execute(ctx context.Context, client *Client) (*SearchResponse, error) {
-	return client.KeywordSearch(ctx, &s.request)
+	return client.Search.KeywordSearch(ctx, &s.request)
 }

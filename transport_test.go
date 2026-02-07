@@ -30,7 +30,7 @@ func TestClientSetHeaders(t *testing.T) {
 	defer cancel()
 
 	// Make a request (will get auth error but we can see headers were attempted)
-	_, _ = client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	_, _ = client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 }
 
 // TestClientCustomerIdHeader tests that X-DIGIKEY-Customer-Id header is set when customerID is configured.
@@ -51,7 +51,7 @@ func TestClientCustomerIdHeader(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, _ = client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	_, _ = client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 }
 
 // TestClientCustomerIdHeaderAbsent tests that X-DIGIKEY-Customer-Id header is absent when not configured.
@@ -72,7 +72,7 @@ func TestClientCustomerIdHeaderAbsent(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, _ = client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	_, _ = client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 }
 
 // TestClientHandleErrorResponse tests error response handling
@@ -89,7 +89,7 @@ func TestClientHandleErrorResponse(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	_, err := client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 	if err == nil {
 		t.Error("expected error response")
 	}
@@ -109,7 +109,7 @@ func TestClientHandleRateLimitError(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	_, err := client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 	if err == nil {
 		t.Error("expected rate limit error")
 	}
@@ -130,7 +130,7 @@ func TestClientRetryLogic(t *testing.T) {
 	defer cancel()
 
 	// Make request - should succeed (it will fail with JSON issue but that's ok, we're testing client setup)
-	_, _ = client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	_, _ = client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 }
 
 // TestClientDisableRetry tests that retry can be disabled
@@ -148,7 +148,7 @@ func TestClientDisableRetry(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	_, err := client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 	if err == nil {
 		t.Error("expected error without retry")
 	}
@@ -187,7 +187,7 @@ func TestClientResponseMalformed(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	_, err := client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 	if err == nil {
 		t.Error("expected error for malformed response")
 	}
@@ -206,7 +206,7 @@ func TestClientEmptyResponse(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	_, err := client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 	if err == nil {
 		t.Error("expected error for empty response")
 	}
@@ -226,7 +226,7 @@ func TestClientReadBodyError(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
 
-	_, _ = client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	_, _ = client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 }
 
 // TestClientContextCancellation tests that context cancellation works
@@ -242,7 +242,7 @@ func TestClientContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
 
-	_, err := client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	_, err := client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 	if err == nil {
 		t.Error("expected context deadline error")
 	}
@@ -270,7 +270,7 @@ func TestClientHeadersNotModified(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, _ = client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	_, _ = client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 }
 
 // TestClientDo tests the main do function with different HTTP methods
@@ -302,7 +302,7 @@ func TestClientDo(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 
 		if test.method == http.MethodPost {
-			_, _ = client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+			_, _ = client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 		} else {
 			_, _ = client.ProductDetails(ctx, "123")
 		}
@@ -326,7 +326,7 @@ func TestClientStatusCodeHandling(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	_, _ = client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	_, _ = client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 	client.Close()
 	server.Close()
 
@@ -341,7 +341,7 @@ func TestClientStatusCodeHandling(t *testing.T) {
 	ctx, cancel = context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	_, err := client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	_, err := client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 	if err == nil {
 		t.Error("expected error for 400 status")
 	}
@@ -365,5 +365,5 @@ func TestClientResponseBodyClosing(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, _ = client.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	_, _ = client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
 }

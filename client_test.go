@@ -267,7 +267,7 @@ func TestContextTimeout(t *testing.T) {
 
 	// This will fail because we don't have real credentials,
 	// but we want to verify context timeout handling
-	_, err := client.KeywordSearch(ctx, &SearchRequest{
+	_, err := client.Search.KeywordSearch(ctx, &SearchRequest{
 		Keywords: "test",
 	})
 

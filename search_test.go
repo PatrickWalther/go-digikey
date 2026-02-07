@@ -161,7 +161,7 @@ func TestKeywordSearchNilRequest(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
-	_, err := client.KeywordSearch(ctx, nil)
+	_, err := client.Search.KeywordSearch(ctx, nil)
 	if err == nil {
 		t.Error("expected error for nil request")
 	}
@@ -178,7 +178,7 @@ func TestKeywordSearchEmptyKeywords(t *testing.T) {
 	defer cancel()
 
 	req := &SearchRequest{Keywords: ""}
-	_, err := client.KeywordSearch(ctx, req)
+	_, err := client.Search.KeywordSearch(ctx, req)
 	if err == nil {
 		t.Error("expected error for empty keywords")
 	}
@@ -208,7 +208,7 @@ func TestKeywordSearchLimitAdjustment(t *testing.T) {
 			Limit:    test.input,
 		}
 		// We expect auth error, but we can check the request was at least created
-		_, err := client.KeywordSearch(ctx, req)
+		_, err := client.Search.KeywordSearch(ctx, req)
 		if err == nil {
 			t.Error("expected error (no real API)")
 		}
