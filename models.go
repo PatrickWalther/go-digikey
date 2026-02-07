@@ -288,48 +288,4 @@ type AppliedFilter struct {
 	ValueText     string `json:"ValueText"`
 }
 
-// --- DigiReel Pricing ---
-
-// DigiReelPricingResponse represents a DigiReel pricing response.
-type DigiReelPricingResponse struct {
-	ReelingFee        float64      `json:"ReelingFee"`
-	UnitPrice         float64      `json:"UnitPrice"`
-	ExtendedPrice     float64      `json:"ExtendedPrice"`
-	RequestedQuantity int          `json:"RequestedQuantity"`
-	SearchLocaleUsed  SearchLocale `json:"SearchLocaleUsed"`
-}
-
-// --- Package Type by Quantity ---
-
-// PackageTypeByQuantityProduct represents a product in a package type by quantity response.
-type PackageTypeByQuantityProduct struct {
-	RecommendedQuantity           int          `json:"RecommendedQuantity"`
-	DigiKeyProductNumber          string       `json:"DigiKeyProductNumber"`
-	QuantityAvailable             int          `json:"QuantityAvailable"`
-	ProductDescription            string       `json:"ProductDescription"`
-	DetailedDescription           string       `json:"DetailedDescription"`
-	ManufacturerName              string       `json:"ManufacturerName"`
-	ManufacturerProductNumber     string       `json:"ManufacturerProductNumber"`
-	MinimumOrderQuantity          int          `json:"MinimumOrderQuantity"`
-	PrimaryDatasheetUrl           string       `json:"PrimaryDatasheetUrl"`
-	PrimaryPhotoUrl               string       `json:"PrimaryPhotoUrl"`
-	ProductStatus                 string       `json:"ProductStatus"`
-	ManufacturerLeadWeeks         string       `json:"ManufacturerLeadWeeks"`
-	ManufacturerWarehouseQuantity int          `json:"ManufacturerWarehouseQuantity"`
-	RohsStatus                    string       `json:"RohsStatus"`
-	RoHSCompliant                 bool         `json:"RoHSCompliant"`
-	QuantityOnOrder               int          `json:"QuantityOnOrder"`
-	StandardPricing               []PriceBreak `json:"StandardPricing"`
-	MyPricing                     []PriceBreak `json:"MyPricing"`
-	ProductUrl                    string       `json:"ProductUrl"`
-	MarketPlace                   bool         `json:"MarketPlace"`
-	Supplier                      string       `json:"Supplier"`
-	StockNote                     string       `json:"StockNote"`
-	PackageTypes                  []string     `json:"PackageTypes"`
-}
-
-// PackageTypeByQuantityResponse represents a package type by quantity response.
-type PackageTypeByQuantityResponse struct {
-	Products []PackageTypeByQuantityProduct `json:"Products"`
-}
 

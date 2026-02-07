@@ -108,14 +108,14 @@ func ExampleProductService_Associations() {
 	}
 }
 
-func ExampleClient_DigiReelPricing() {
+func ExamplePricingService_DigiReel() {
 	client := digikey.NewClient(
 		os.Getenv("DIGIKEY_CLIENT_ID"),
 		os.Getenv("DIGIKEY_CLIENT_SECRET"),
 	)
 	defer client.Close()
 
-	resp, err := client.DigiReelPricing(context.Background(), "497-15360-ND", 1000)
+	resp, err := client.Pricing.DigiReel(context.Background(), "497-15360-ND", 1000)
 	if err != nil {
 		fmt.Println("error:", err)
 		return
