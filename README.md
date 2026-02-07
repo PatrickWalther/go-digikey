@@ -5,7 +5,7 @@
 [![Tests](https://github.com/PatrickWalther/go-digikey/actions/workflows/test.yml/badge.svg)](https://github.com/PatrickWalther/go-digikey/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Go client library for the [Digi-Key](https://www.digikey.com) Product Search API v4. **100% API coverage** — all 11 endpoints supported.
+A Go client library for the [Digi-Key](https://www.digikey.com) Product Search API v4. **100% API coverage of the official python package by digikey** — all 11 endpoints supported.
 
 ## Requirements
 
