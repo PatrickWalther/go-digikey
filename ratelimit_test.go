@@ -142,16 +142,21 @@ func TestRateLimiterUpdateFromResponse(t *testing.T) {
 	}
 }
 
-// TestRateLimiterUpdateFromResponseLongWindowPromotesToDayLimit ensures long
-// Retry-After windows are represented as day/global limits.
-func TestRateLimiterUpdateFromResponseLongWindowPromotesToDayLimit(t *testing.T) {
+// TestRateLimiterUpdateFromRateLimitErrorDay ensures explicit day-limit errors
+// lock the day bucket (without inferring from Retry-After duration).
+func TestRateLimiterUpdateFromRateLimitErrorDay(t *testing.T) {
 	rl := NewRateLimiterWithLimits(10, 100)
-
-	rl.UpdateFromResponse(3 * 60 * 60) // 3 hours
+	reset := time.Now().Add(2 * time.Hour).UTC().Format(time.RFC3339)
+	rl.UpdateFromRateLimitError(&RateLimitError{
+		Limit:     100,
+		Remaining: 0,
+		ResetAt:   reset,
+		Type:      "day",
+	})
 
 	err := rl.Allow()
 	if err == nil {
-		t.Fatal("expected rate limit error after long Retry-After update")
+		t.Fatal("expected rate limit error after explicit day-limit update")
 	}
 
 	rle, ok := err.(*RateLimitError)
@@ -163,11 +168,37 @@ func TestRateLimiterUpdateFromResponseLongWindowPromotesToDayLimit(t *testing.T)
 	}
 
 	stats := rl.Stats()
-	if stats.DayRemaining != 0 {
-		t.Fatalf("expected day remaining 0 after long Retry-After, got %d", stats.DayRemaining)
+	if stats.DayLimit != 100 {
+		t.Fatalf("expected day limit 100, got %d", stats.DayLimit)
 	}
-	if stats.MinuteRemaining != stats.MinuteLimit {
-		t.Fatalf("expected minute bucket to remain available, got remaining=%d limit=%d", stats.MinuteRemaining, stats.MinuteLimit)
+	if stats.DayRemaining != 0 {
+		t.Fatalf("expected day remaining 0, got %d", stats.DayRemaining)
+	}
+}
+
+// TestRateLimiterUpdateFromRateLimitErrorMinute ensures explicit burst/minute
+// errors lock the minute bucket.
+func TestRateLimiterUpdateFromRateLimitErrorMinute(t *testing.T) {
+	rl := NewRateLimiterWithLimits(10, 100)
+	reset := time.Now().Add(45 * time.Second).UTC().Format(time.RFC3339)
+	rl.UpdateFromRateLimitError(&RateLimitError{
+		Limit:     10,
+		Remaining: 0,
+		ResetAt:   reset,
+		Type:      "minute",
+	})
+
+	err := rl.Allow()
+	if err == nil {
+		t.Fatal("expected rate limit error after explicit minute-limit update")
+	}
+
+	rle, ok := err.(*RateLimitError)
+	if !ok {
+		t.Fatalf("expected RateLimitError, got %T", err)
+	}
+	if rle.Type != "minute" {
+		t.Fatalf("expected minute rate limit type, got %q", rle.Type)
 	}
 }
 

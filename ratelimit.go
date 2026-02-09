@@ -1,11 +1,10 @@
 package digikey
 
 import (
+	"strings"
 	"sync"
 	"time"
 )
-
-const maxMinuteRetryAfter = 2 * time.Minute
 
 // RateLimiter tracks API usage against Digi-Key's rate limits.
 // Limits: 120 requests/minute, 1000 requests/day.
@@ -190,18 +189,51 @@ func (r *RateLimiter) UpdateFromResponse(retryAfterSeconds int) {
 	now := time.Now()
 	wait := time.Duration(retryAfterSeconds) * time.Second
 	resetAt := now.Add(wait)
+	r.minuteCount = r.minuteLimit
+	r.minuteResetTime = resetAt
+}
 
-	// Most provider minute limits reset within ~60s. Treat extended Retry-After
-	// windows as day/global throttling so callers don't get misleading
-	// "minute limit" errors with multi-hour reset times.
-	if wait <= maxMinuteRetryAfter {
-		r.minuteCount = r.minuteLimit
-		r.minuteResetTime = resetAt
+// UpdateFromRateLimitError updates limiter state using structured API
+// rate-limit details.
+func (r *RateLimiter) UpdateFromRateLimitError(rateErr *RateLimitError) {
+	if rateErr == nil {
 		return
 	}
 
-	r.dayCount = r.dayLimit
-	r.dayResetTime = resetAt
-	r.minuteCount = 0
-	r.minuteResetTime = now.Add(time.Minute)
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	now := time.Now()
+	resetAt := parseRateLimitResetAt(rateErr.ResetAt)
+
+	switch strings.ToLower(strings.TrimSpace(rateErr.Type)) {
+	case "day":
+		if rateErr.Limit > 0 {
+			r.dayLimit = rateErr.Limit
+		}
+		r.dayCount = r.dayLimit
+		if !resetAt.IsZero() && resetAt.After(now) {
+			r.dayResetTime = resetAt
+		}
+	default:
+		if rateErr.Limit > 0 {
+			r.minuteLimit = rateErr.Limit
+		}
+		r.minuteCount = r.minuteLimit
+		if !resetAt.IsZero() && resetAt.After(now) {
+			r.minuteResetTime = resetAt
+		}
+	}
+}
+
+func parseRateLimitResetAt(value string) time.Time {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return time.Time{}
+	}
+	parsed, err := time.Parse(time.RFC3339, value)
+	if err != nil {
+		return time.Time{}
+	}
+	return parsed
 }

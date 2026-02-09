@@ -115,6 +115,78 @@ func TestClientHandleRateLimitError(t *testing.T) {
 	}
 }
 
+func TestClientHandleRateLimitErrorBurstHeaders(t *testing.T) {
+	server := newMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Retry-After", "42")
+		w.Header().Set("X-BurstLimit-Limit", "120")
+		w.Header().Set("X-BurstLimit-Remaining", "0")
+		w.Header().Set("X-BurstLimit-Reset", "42")
+		w.WriteHeader(http.StatusTooManyRequests)
+		_, _ = w.Write([]byte(`{"ErrorMessage":"BurstLimit exceeded","ErrorDetails":"retry later"}`))
+	})
+	defer server.Close()
+
+	client := newMockClient(t, server)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	if err == nil {
+		t.Fatal("expected rate limit error")
+	}
+
+	rle, ok := err.(*RateLimitError)
+	if !ok {
+		t.Fatalf("expected RateLimitError, got %T", err)
+	}
+	if rle.Type != "minute" {
+		t.Fatalf("expected minute type, got %q", rle.Type)
+	}
+	if rle.Limit != 120 {
+		t.Fatalf("expected burst limit 120, got %d", rle.Limit)
+	}
+	if rle.Remaining != 0 {
+		t.Fatalf("expected burst remaining 0, got %d", rle.Remaining)
+	}
+}
+
+func TestClientHandleRateLimitErrorDailyHeaders(t *testing.T) {
+	server := newMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Retry-After", "3600")
+		w.Header().Set("X-RateLimit-Limit", "1000")
+		w.Header().Set("X-RateLimit-Remaining", "0")
+		w.Header().Set("X-RateLimit-Reset", "3600")
+		w.WriteHeader(http.StatusTooManyRequests)
+		_, _ = w.Write([]byte(`{"ErrorMessage":"Daily Ratelimit exceeded","ErrorDetails":"retry later"}`))
+	})
+	defer server.Close()
+
+	client := newMockClient(t, server)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+	if err == nil {
+		t.Fatal("expected rate limit error")
+	}
+
+	rle, ok := err.(*RateLimitError)
+	if !ok {
+		t.Fatalf("expected RateLimitError, got %T", err)
+	}
+	if rle.Type != "day" {
+		t.Fatalf("expected day type, got %q", rle.Type)
+	}
+	if rle.Limit != 1000 {
+		t.Fatalf("expected day limit 1000, got %d", rle.Limit)
+	}
+	if rle.Remaining != 0 {
+		t.Fatalf("expected day remaining 0, got %d", rle.Remaining)
+	}
+}
+
 // TestClientRetryLogic tests that API calls are made
 func TestClientRetryLogic(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

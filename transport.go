@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
+	"strings"
+	"time"
 )
 
 // do performs an HTTP request with authentication, rate limiting, and retries.
@@ -98,9 +101,10 @@ func (c *Client) doOnce(ctx context.Context, method, path string, body interface
 	// Handle rate limiting (429)
 	if resp.StatusCode == http.StatusTooManyRequests {
 		retryAfter := parseRetryAfter(resp.Header.Get("Retry-After"))
-		c.rateLimiter.UpdateFromResponse(retryAfter)
 		apiErr := c.handleErrorResponse(resp.StatusCode, respBody, resp.Header)
-		return resp.StatusCode, true, apiErr
+		rateErr := c.buildRateLimitError(resp.Header, retryAfter, apiErr)
+		c.rateLimiter.UpdateFromRateLimitError(rateErr)
+		return resp.StatusCode, shouldRetryRateLimit(rateErr), rateErr
 	}
 
 	// Handle unauthorized (401)
@@ -151,16 +155,160 @@ func (c *Client) handleErrorResponse(statusCode int, body []byte, headers http.H
 	}
 
 	var errResp struct {
-		Message string `json:"message"`
-		Details string `json:"details"`
+		Message      string `json:"message"`
+		Details      string `json:"details"`
+		ErrorMessage string `json:"ErrorMessage"`
+		ErrorDetails string `json:"ErrorDetails"`
 	}
 	if err := json.Unmarshal(body, &errResp); err == nil {
 		apiErr.Message = errResp.Message
 		apiErr.Details = errResp.Details
+		if apiErr.Message == "" {
+			apiErr.Message = errResp.ErrorMessage
+		}
+		if apiErr.Details == "" {
+			apiErr.Details = errResp.ErrorDetails
+		}
 	} else {
 		apiErr.Message = http.StatusText(statusCode)
 		apiErr.Details = string(body)
 	}
 
 	return apiErr
+}
+
+func shouldRetryRateLimit(rateErr *RateLimitError) bool {
+	return !strings.EqualFold(strings.TrimSpace(rateErr.Type), "day")
+}
+
+func (c *Client) buildRateLimitError(headers http.Header, retryAfter int, apiErr error) *RateLimitError {
+	apiTyped, _ := apiErr.(*APIError)
+	message := ""
+	if apiTyped != nil {
+		message = strings.TrimSpace(apiTyped.Message)
+	}
+
+	rateType := detectRateLimitType(headers, message)
+	limit, remaining := extractRateLimitWindow(headers, rateType, c.RateLimitStats())
+	resetAt := resolveRateLimitResetAt(headers, rateType, retryAfter)
+
+	return &RateLimitError{
+		Limit:     limit,
+		Remaining: remaining,
+		ResetAt:   resetAt,
+		Type:      rateType,
+	}
+}
+
+func detectRateLimitType(headers http.Header, message string) string {
+	if hasAnyHeader(headers, "X-BurstLimit-Limit", "X-BurstLimit-Remaining", "X-BurstLimit-Reset", "X-BurstLimit-ResetTime") {
+		return "minute"
+	}
+
+	normalizedMessage := strings.ToLower(strings.TrimSpace(message))
+	if strings.Contains(normalizedMessage, "burstlimit") {
+		return "minute"
+	}
+
+	if hasAnyHeader(headers, "X-RateLimit-Reset", "X-RateLimit-ResetTime") {
+		return "day"
+	}
+	if strings.Contains(normalizedMessage, "daily ratelimit exceeded") {
+		return "day"
+	}
+
+	// Default to burst/minute behavior when provider context is incomplete.
+	return "minute"
+}
+
+func extractRateLimitWindow(headers http.Header, rateType string, stats RateLimitStats) (int, int) {
+	switch rateType {
+	case "day":
+		limit := parseHeaderInt(headers, "X-RateLimit-Limit")
+		remaining := parseHeaderInt(headers, "X-RateLimit-Remaining")
+		if limit <= 0 {
+			limit = stats.DayLimit
+		}
+		if remaining < 0 {
+			remaining = 0
+		}
+		return limit, remaining
+	default:
+		limit := parseHeaderInt(headers, "X-BurstLimit-Limit")
+		remaining := parseHeaderInt(headers, "X-BurstLimit-Remaining")
+		if limit <= 0 {
+			limit = stats.MinuteLimit
+		}
+		if remaining < 0 {
+			remaining = 0
+		}
+		return limit, remaining
+	}
+}
+
+func resolveRateLimitResetAt(headers http.Header, rateType string, retryAfter int) string {
+	now := time.Now()
+	if ts := parseHeaderResetTime(headers, rateType); !ts.IsZero() {
+		return ts.UTC().Format(time.RFC3339)
+	}
+
+	if seconds := parseHeaderResetSeconds(headers, rateType); seconds > 0 {
+		return now.Add(time.Duration(seconds) * time.Second).UTC().Format(time.RFC3339)
+	}
+
+	if retryAfter > 0 {
+		return now.Add(time.Duration(retryAfter) * time.Second).UTC().Format(time.RFC3339)
+	}
+	return ""
+}
+
+func parseHeaderResetTime(headers http.Header, rateType string) time.Time {
+	var value string
+	switch rateType {
+	case "day":
+		value = strings.TrimSpace(headers.Get("X-RateLimit-ResetTime"))
+	default:
+		value = strings.TrimSpace(headers.Get("X-BurstLimit-ResetTime"))
+	}
+	if value == "" {
+		return time.Time{}
+	}
+
+	layouts := []string{time.RFC3339, time.RFC1123, time.RFC1123Z}
+	for _, layout := range layouts {
+		if parsed, err := time.Parse(layout, value); err == nil {
+			return parsed
+		}
+	}
+	return time.Time{}
+}
+
+func parseHeaderResetSeconds(headers http.Header, rateType string) int {
+	switch rateType {
+	case "day":
+		return parseHeaderInt(headers, "X-RateLimit-Reset")
+	default:
+		return parseHeaderInt(headers, "X-BurstLimit-Reset")
+	}
+}
+
+func hasAnyHeader(headers http.Header, keys ...string) bool {
+	for _, key := range keys {
+		if strings.TrimSpace(headers.Get(key)) != "" {
+			return true
+		}
+	}
+	return false
+}
+
+func parseHeaderInt(headers http.Header, key string) int {
+	raw := strings.TrimSpace(headers.Get(key))
+	if raw == "" {
+		return -1
+	}
+	value, err := strconv.Atoi(raw)
+	if err != nil {
+		return -1
+	}
+	return value
 }
