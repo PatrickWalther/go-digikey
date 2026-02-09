@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const maxMinuteRetryAfter = 2 * time.Minute
+
 // RateLimiter tracks API usage against Digi-Key's rate limits.
 // Limits: 120 requests/minute, 1000 requests/day.
 type RateLimiter struct {
@@ -185,7 +187,21 @@ func (r *RateLimiter) UpdateFromResponse(retryAfterSeconds int) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	// Set minute count to limit to prevent further requests
-	r.minuteCount = r.minuteLimit
-	r.minuteResetTime = time.Now().Add(time.Duration(retryAfterSeconds) * time.Second)
+	now := time.Now()
+	wait := time.Duration(retryAfterSeconds) * time.Second
+	resetAt := now.Add(wait)
+
+	// Most provider minute limits reset within ~60s. Treat extended Retry-After
+	// windows as day/global throttling so callers don't get misleading
+	// "minute limit" errors with multi-hour reset times.
+	if wait <= maxMinuteRetryAfter {
+		r.minuteCount = r.minuteLimit
+		r.minuteResetTime = resetAt
+		return
+	}
+
+	r.dayCount = r.dayLimit
+	r.dayResetTime = resetAt
+	r.minuteCount = 0
+	r.minuteResetTime = now.Add(time.Minute)
 }

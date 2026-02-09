@@ -142,6 +142,35 @@ func TestRateLimiterUpdateFromResponse(t *testing.T) {
 	}
 }
 
+// TestRateLimiterUpdateFromResponseLongWindowPromotesToDayLimit ensures long
+// Retry-After windows are represented as day/global limits.
+func TestRateLimiterUpdateFromResponseLongWindowPromotesToDayLimit(t *testing.T) {
+	rl := NewRateLimiterWithLimits(10, 100)
+
+	rl.UpdateFromResponse(3 * 60 * 60) // 3 hours
+
+	err := rl.Allow()
+	if err == nil {
+		t.Fatal("expected rate limit error after long Retry-After update")
+	}
+
+	rle, ok := err.(*RateLimitError)
+	if !ok {
+		t.Fatalf("expected RateLimitError, got %T", err)
+	}
+	if rle.Type != "day" {
+		t.Fatalf("expected day rate limit type, got %q", rle.Type)
+	}
+
+	stats := rl.Stats()
+	if stats.DayRemaining != 0 {
+		t.Fatalf("expected day remaining 0 after long Retry-After, got %d", stats.DayRemaining)
+	}
+	if stats.MinuteRemaining != stats.MinuteLimit {
+		t.Fatalf("expected minute bucket to remain available, got remaining=%d limit=%d", stats.MinuteRemaining, stats.MinuteLimit)
+	}
+}
+
 // TestRateLimiterUpdateFromResponseZero tests UpdateFromResponse with zero.
 func TestRateLimiterUpdateFromResponseZero(t *testing.T) {
 	rl := NewRateLimiter()

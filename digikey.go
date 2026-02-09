@@ -82,4 +82,4 @@
 package digikey
 
 // Version is the current version of the go-digikey package.
-const Version = "1.0.0"
+const Version = "1.0.1"

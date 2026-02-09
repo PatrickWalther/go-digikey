@@ -140,6 +140,12 @@ func parseRetryAfter(header string) int {
 			return seconds
 		}
 	}
+	if t, err := time.Parse(time.RFC1123Z, header); err == nil {
+		seconds := int(time.Until(t).Seconds())
+		if seconds > 0 {
+			return seconds
+		}
+	}
 
 	return 0
 }

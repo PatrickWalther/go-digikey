@@ -105,6 +105,24 @@ func TestParseRetryAfterSeconds(t *testing.T) {
 	}
 }
 
+// TestParseRetryAfterHTTPDate tests parsing retry-after as HTTP date.
+func TestParseRetryAfterHTTPDate(t *testing.T) {
+	header := time.Now().Add(10 * time.Second).UTC().Format(time.RFC1123)
+	seconds := parseRetryAfter(header)
+	if seconds <= 0 {
+		t.Fatalf("expected positive seconds from RFC1123 date, got %d", seconds)
+	}
+}
+
+// TestParseRetryAfterHTTPDateWithNumericZone tests parsing retry-after with numeric timezone.
+func TestParseRetryAfterHTTPDateWithNumericZone(t *testing.T) {
+	header := time.Now().Add(10 * time.Second).UTC().Format(time.RFC1123Z)
+	seconds := parseRetryAfter(header)
+	if seconds <= 0 {
+		t.Fatalf("expected positive seconds from RFC1123Z date, got %d", seconds)
+	}
+}
+
 // TestParseRetryAfterEmpty tests parsing empty retry-after.
 func TestParseRetryAfterEmpty(t *testing.T) {
 	seconds := parseRetryAfter("")
