@@ -98,6 +98,9 @@ func (c *Client) doOnce(ctx context.Context, method, path string, body interface
 		return resp.StatusCode, false, fmt.Errorf("digikey: failed to read response: %w", err)
 	}
 
+	// Sync rate limiter from response headers on every response.
+	c.rateLimiter.UpdateFromHeaders(resp.Header)
+
 	// Handle rate limiting (429)
 	if resp.StatusCode == http.StatusTooManyRequests {
 		retryAfter := parseRetryAfter(resp.Header.Get("Retry-After"))

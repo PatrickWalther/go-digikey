@@ -1,6 +1,7 @@
 package digikey
 
 import (
+	"net/http"
 	"strings"
 	"sync"
 	"time"
@@ -223,6 +224,52 @@ func (r *RateLimiter) UpdateFromRateLimitError(rateErr *RateLimitError) {
 		if !resetAt.IsZero() && resetAt.After(now) {
 			r.minuteResetTime = resetAt
 		}
+	}
+}
+
+// UpdateFromHeaders syncs rate limiter state from API response headers.
+// DigiKey includes X-BurstLimit-* (minute) and X-RateLimit-* (day) headers
+// on all responses, not just 429s.
+func (r *RateLimiter) UpdateFromHeaders(headers http.Header) {
+	if headers == nil {
+		return
+	}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	// Sync burst/minute limit
+	if limit := parseHeaderInt(headers, "X-BurstLimit-Limit"); limit > 0 {
+		r.minuteLimit = limit
+	}
+	if remaining := parseHeaderInt(headers, "X-BurstLimit-Remaining"); remaining >= 0 {
+		used := r.minuteLimit - remaining
+		if used < 0 {
+			used = 0
+		}
+		r.minuteCount = used
+	}
+	if ts := parseHeaderResetTime(headers, "minute"); !ts.IsZero() {
+		r.minuteResetTime = ts
+	} else if seconds := parseHeaderResetSeconds(headers, "minute"); seconds > 0 {
+		r.minuteResetTime = time.Now().Add(time.Duration(seconds) * time.Second)
+	}
+
+	// Sync day limit
+	if limit := parseHeaderInt(headers, "X-RateLimit-Limit"); limit > 0 {
+		r.dayLimit = limit
+	}
+	if remaining := parseHeaderInt(headers, "X-RateLimit-Remaining"); remaining >= 0 {
+		used := r.dayLimit - remaining
+		if used < 0 {
+			used = 0
+		}
+		r.dayCount = used
+	}
+	if ts := parseHeaderResetTime(headers, "day"); !ts.IsZero() {
+		r.dayResetTime = ts
+	} else if seconds := parseHeaderResetSeconds(headers, "day"); seconds > 0 {
+		r.dayResetTime = time.Now().Add(time.Duration(seconds) * time.Second)
 	}
 }
 

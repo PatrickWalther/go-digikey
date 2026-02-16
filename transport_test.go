@@ -187,6 +187,40 @@ func TestClientHandleRateLimitErrorDailyHeaders(t *testing.T) {
 	}
 }
 
+// TestClientSuccessResponseSyncsRateLimits tests that successful responses update rate limiter from headers.
+func TestClientSuccessResponseSyncsRateLimits(t *testing.T) {
+	server := newMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-BurstLimit-Limit", "120")
+		w.Header().Set("X-BurstLimit-Remaining", "70")
+		w.Header().Set("X-RateLimit-Limit", "1000")
+		w.Header().Set("X-RateLimit-Remaining", "900")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"Products":[]}`))
+	})
+	defer server.Close()
+
+	client := newMockClient(t, server)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, _ = client.Search.KeywordSearch(ctx, &SearchRequest{Keywords: "test", Limit: 5})
+
+	stats := client.RateLimitStats()
+	if stats.MinuteLimit != 120 {
+		t.Errorf("expected minute limit 120, got %d", stats.MinuteLimit)
+	}
+	if stats.MinuteRemaining != 70 {
+		t.Errorf("expected minute remaining 70, got %d", stats.MinuteRemaining)
+	}
+	if stats.DayLimit != 1000 {
+		t.Errorf("expected day limit 1000, got %d", stats.DayLimit)
+	}
+	if stats.DayRemaining != 900 {
+		t.Errorf("expected day remaining 900, got %d", stats.DayRemaining)
+	}
+}
+
 // TestClientRetryLogic tests that API calls are made
 func TestClientRetryLogic(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
