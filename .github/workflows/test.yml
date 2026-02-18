@@ -5,6 +5,7 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  workflow_call:
 
 permissions:
   contents: read
@@ -15,7 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: ['1.22', '1.23']
+        go-version: ['1.23', '1.24', '1.25', 'stable']
+      fail-fast: false
 
     steps:
       - uses: actions/checkout@v4
@@ -28,17 +30,11 @@ jobs:
       - name: Build
         run: go build -v ./...
 
-      - name: Unit Tests
+      - name: Test
         run: go test -v -race -short -coverprofile=coverage.out ./...
 
-      - name: Integration Tests
-        if: github.event_name == 'push'
-        run: go test -v -run Integration ./...
-        env:
-          DIGIKEY_CLIENT_ID: ${{ secrets.DIGIKEY_CLIENT_ID }}
-          DIGIKEY_CLIENT_SECRET: ${{ secrets.DIGIKEY_CLIENT_SECRET }}
-
       - name: Upload coverage
+        if: matrix.go-version == 'stable'
         uses: codecov/codecov-action@v4
         with:
           files: coverage.out
@@ -53,12 +49,13 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23'
+          go-version: stable
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: latest
+          version: v1.64.8
+          args: --timeout=5m
 
   security:
     runs-on: ubuntu-latest
@@ -68,10 +65,10 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23'
+          go-version: stable
 
       - name: Run Gosec Security Scanner
-        uses: securego/gosec@v2.22.11
+        uses: securego/gosec@v2.22.4
         with:
           args: '-no-fail -fmt sarif -out results.sarif ./...'
 
@@ -80,3 +77,24 @@ jobs:
         if: always()
         with:
           sarif_file: results.sarif
+
+  codeql:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: 'go'
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v4
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4

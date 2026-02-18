@@ -1,3 +1,3 @@
 module github.com/PatrickWalther/go-digikey
 
-go 1.22
+go 1.23
