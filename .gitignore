@@ -66,8 +66,6 @@ debugTests
 tmp/
 
 # AI agents and coding assistants
-CLAUDE.md
-.claude/
 .planning/
 .cursorrules
 .cursorignore
